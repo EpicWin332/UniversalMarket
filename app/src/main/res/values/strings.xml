@@ -2,4 +2,5 @@
     <string name="app_name">UniversalMarket</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_items_list">ItemsList</string>
+    <string name="title_activity_product_info">ProductInfo</string>
 </resources>

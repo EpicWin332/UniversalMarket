@@ -57,18 +57,21 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder>{
         holder.itemName.setText(items.get(position).name);
         holder.itemDescription.setText(items.get(position).description);
         String url = items.get(position).photoUrl;
+        if (!"".equals(url)) {
+            imageLoader.get(url, new ImageLoader.ImageListener() {
+                @Override
+                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                    holder.itemPhoto.setImageBitmap(response.getBitmap());
+                }
 
-        imageLoader.get(url, new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                holder.itemPhoto.setImageBitmap(response.getBitmap());
-            }
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    holder.itemPhoto.setImageResource(R.mipmap.no_image);
+                }
+            });
+        } else {
+            holder.itemPhoto.setImageResource(R.mipmap.no_image);
+        }
     }
 
     @Override

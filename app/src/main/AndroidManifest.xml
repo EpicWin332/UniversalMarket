@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,7 +24,20 @@
         <activity
             android:name=".ItemsList"
             android:label="@string/title_activity_items_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.magomed.gamzatov.universalmarket.MainActivity" />
+        <activity
+            android:name=".ProductInfo"
+            android:label="@string/title_activity_product_info"
+            android:parentActivityName=".ItemsList"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.magomed.gamzatov.universalmarket.ItemsList" />
+        </activity>
     </application>
 
 </manifest>
