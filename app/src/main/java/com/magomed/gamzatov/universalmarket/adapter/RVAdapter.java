@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
@@ -15,9 +16,11 @@ import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
 
 import java.util.List;
 
-public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder>{
+public class RVAdapter extends RecyclerView.Adapter{
 
     private ImageLoader imageLoader;
+    static public final int VIEW_ITEM = 1;
+    static public final int VIEW_PROG = 0;
 
     public static class PersonViewHolder extends RecyclerView.ViewHolder {
         CardView cv;
@@ -33,6 +36,14 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder>{
         }
     }
 
+    public static class ProgressViewHolder extends RecyclerView.ViewHolder {
+        public ProgressBar progressBar;
+        public ProgressViewHolder(View v) {
+            super(v);
+            progressBar = (ProgressBar) v.findViewById(R.id.progressBar1);
+        }
+    }
+
     List<Item> items;
 
     public RVAdapter(List<Item> item){
@@ -42,9 +53,19 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder>{
     }
 
     @Override
-    public PersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
-        return new PersonViewHolder(v);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        RecyclerView.ViewHolder vh;
+        if (viewType == VIEW_ITEM) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.item, parent, false);
+
+            vh = new PersonViewHolder(v);
+        } else {
+            View v = LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.progressbar_item, parent, false);
+            vh = new ProgressViewHolder(v);
+        }
+        return vh;
     }
 
     @Override
@@ -53,25 +74,34 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(final PersonViewHolder holder, int position) {
-        holder.itemName.setText(items.get(position).name);
-        holder.itemDescription.setText(items.get(position).description);
-        String url = items.get(position).photoUrl;
-        if (!"".equals(url)) {
-            imageLoader.get(url, new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    holder.itemPhoto.setImageBitmap(response.getBitmap());
-                }
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+        if(holder instanceof PersonViewHolder) {
+            ((PersonViewHolder)holder).itemName.setText(items.get(position).name);
+            ((PersonViewHolder)holder).itemDescription.setText(items.get(position).description);
+            String url = items.get(position).photoUrl;
+            if (!"".equals(url)) {
+                imageLoader.get(url, new ImageLoader.ImageListener() {
+                    @Override
+                    public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                        ((PersonViewHolder)holder).itemPhoto.setImageBitmap(response.getBitmap());
+                    }
 
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    holder.itemPhoto.setImageResource(R.mipmap.no_image);
-                }
-            });
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((PersonViewHolder)holder).itemPhoto.setImageResource(R.mipmap.no_image);
+                    }
+                });
+            } else {
+                ((PersonViewHolder)holder).itemPhoto.setImageResource(R.mipmap.no_image);
+            }
         } else {
-            holder.itemPhoto.setImageResource(R.mipmap.no_image);
+            ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return items.get(position) != null ? VIEW_ITEM : VIEW_PROG;
     }
 
     @Override

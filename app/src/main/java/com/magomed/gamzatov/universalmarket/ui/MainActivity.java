@@ -1,4 +1,4 @@
-package com.magomed.gamzatov.universalmarket;
+package com.magomed.gamzatov.universalmarket.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.magomed.gamzatov.universalmarket.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,23 +25,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Категории");
+        if (toolbar != null) {
+            toolbar.setTitle("Категории");
+        }
         setSupportActionBar(toolbar);
     }
 
     private void initListViewCategory() {
         ListView listViewCategory = (ListView) findViewById(R.id.listViewCategory);
-        String[] list = {"Все", "Категория 1", "Категория 2", "Категория 3"};
+        String[] list = {"Все", "Шорты", "Футболки", "Джинсы"};
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list);
-        listViewCategory.setAdapter(arrayAdapter);
-        listViewCategory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, ItemsList.class);
-                startActivity(intent);
-                overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
-            }
-        });
+        if (listViewCategory != null) {
+            listViewCategory.setAdapter(arrayAdapter);
+            listViewCategory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent intent = new Intent(MainActivity.this, ItemsList.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
+                }
+            });
+        }
     }
 
     @Override

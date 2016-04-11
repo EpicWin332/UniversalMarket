@@ -4,6 +4,14 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -12,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -22,21 +30,35 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ItemsList"
+            android:name=".ui.ItemsList"
             android:label="@string/title_activity_items_list"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.magomed.gamzatov.universalmarket.MainActivity" />
+
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".ui.MainActivity" />
+
         <activity
-            android:name=".ProductInfo"
+            android:name=".ui.ProductInfo"
             android:label="@string/title_activity_product_info"
-            android:parentActivityName=".ItemsList"
+            android:parentActivityName=".ui.ItemsList"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.magomed.gamzatov.universalmarket.ItemsList" />
+                android:value=".ui.ItemsList" />
+        </activity>
+        <activity
+            android:name=".ui.AddProduct"
+            android:label="@string/title_activity_add_product"
+            android:parentActivityName=".ui.ItemsList"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.ItemsList" />
+        </activity>
+        <activity android:name=".ui.ImagePreview"
+            android:theme="@style/AppTheme.NoActionBar.TransparentStatus">
         </activity>
     </application>
 

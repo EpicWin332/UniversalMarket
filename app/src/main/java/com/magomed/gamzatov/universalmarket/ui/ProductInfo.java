@@ -1,4 +1,4 @@
-package com.magomed.gamzatov.universalmarket;
+package com.magomed.gamzatov.universalmarket.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -17,15 +18,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.magomed.gamzatov.universalmarket.R;
 import com.magomed.gamzatov.universalmarket.entity.Items;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
-
-import java.util.ArrayList;
+import com.wang.avi.AVLoadingIndicatorView;
 
 public class ProductInfo extends AppCompatActivity {
 
     private Items items;
+    private static final int MY_SOCKET_TIMEOUT_MS = 60_000;
+    private AVLoadingIndicatorView avLoadingIndicatorView;
+    private boolean imageLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +36,13 @@ public class ProductInfo extends AppCompatActivity {
         setContentView(R.layout.activity_product_info);
 
         Intent intent = getIntent();
-        String brand = intent.getStringExtra("brand");
+        final String brand = intent.getStringExtra("brand");
         String type = intent.getStringExtra("type");
         String price = intent.getStringExtra("price");
         final int id = intent.getIntExtra("id", 0);
         initToolbar(type + " " + brand);
+
+        String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getParticularProduct?id=" + id;
 
         TextView product_brand = (TextView) findViewById(R.id.product_brand);
         TextView product_type = (TextView) findViewById(R.id.product_type);
@@ -47,15 +52,29 @@ public class ProductInfo extends AppCompatActivity {
         final TextView product_adress = (TextView) findViewById(R.id.product_adress);
         final TextView product_phone = (TextView) findViewById(R.id.product_phone);
         final ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avloadingIndicatorView);
 
         product_brand.setText(brand);
         product_type.setText(type);
         product_price.setText(price);
-        //product_description.setText("" + id);
 
-        String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getParticularProduct?id=" + id;
+        volleyRequest(product_description, product_shop, product_adress, product_phone, imageView, url);
 
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(imageLoaded) {
+                    Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
+                    intent.putExtra("image", "http://e455.azurewebsites.net/"+items.getImageUrls().get(0));
+                    startActivity(intent);
+                }
+            }
+        });
+    }
+
+    private void volleyRequest(final TextView product_description, final TextView product_shop, final TextView product_adress, final TextView product_phone, final ImageView imageView, String url) {
         RequestQueue requestQueue = VolleySingleton.getsInstance().getRequestQueue();
+        startAnim();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -66,21 +85,26 @@ public class ProductInfo extends AppCompatActivity {
                 product_adress.setText(items.getShop().getAddress());
                 product_phone.setText(items.getShop().getPhone());
 
-                String imgUrl = items.getImageUrls().isEmpty()? "" : "http://e455.azurewebsites.net"+items.getImageUrls().get(0);
+                String imgUrl = items.getImageUrls().isEmpty()? "" : "http://e455.azurewebsites.net/"+items.getImageUrls().get(0);
                 if(!"".equals(imgUrl)) {
-                    ImageLoader imageLoader = VolleySingleton.getsInstance().getImageLoader();
+                    final ImageLoader imageLoader = VolleySingleton.getsInstance().getImageLoader();
                     imageLoader.get(imgUrl, new ImageLoader.ImageListener() {
                         @Override
                         public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                            stopAnim();
+                            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                             imageView.setImageBitmap(response.getBitmap());
+                            imageLoaded = true;
                         }
 
                         @Override
                         public void onErrorResponse(VolleyError error) {
+                            stopAnim();
                             imageView.setImageResource(R.mipmap.no_image);
                         }
                     });
                 } else {
+                    stopAnim();
                     imageView.setImageResource(R.mipmap.no_image);
                 }
             }
@@ -88,10 +112,14 @@ public class ProductInfo extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_LONG).show();
+                stopAnim();
             }
         });
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                MY_SOCKET_TIMEOUT_MS,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(stringRequest);
-
     }
 
     private void jsonParser(String response){
@@ -112,6 +140,15 @@ public class ProductInfo extends AppCompatActivity {
                 onBackPressed();
             }
         });
+    }
+
+
+    private void startAnim(){
+        avLoadingIndicatorView.setVisibility(View.VISIBLE);
+    }
+
+    private void stopAnim(){
+        avLoadingIndicatorView.setVisibility(View.GONE);
     }
 
     @Override
