@@ -1,16 +1,22 @@
 package com.magomed.gamzatov.universalmarket.ui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -117,9 +123,25 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                 intent.putExtra("type", items.get(position).getType());
                 intent.putExtra("price", items.get(position).getDescription());
                 intent.putExtra("id", items.get(position).getId());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    View textViewName = v.findViewById(R.id.item_name);
+                    View textViewPrice = v.findViewById(R.id.item_description);
+                    View view = v.findViewById(R.id.cv);
+                    View image = v.findViewById(R.id.item_photo);
 
-                startActivity(intent);
-                overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
+                    Pair<View, String> pair1 = Pair.create(textViewName, textViewName.getTransitionName());
+                    Pair<View, String> pair2 = Pair.create(textViewPrice, textViewPrice.getTransitionName());
+                    Pair<View, String> pair3 = Pair.create(view, view.getTransitionName());
+                    Pair<View, String> pair4 = Pair.create(image, image.getTransitionName());
+
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(ItemsList.this, pair2, pair1, pair3, pair4);
+                    startActivity(intent, options.toBundle());
+                }
+                else {
+                    startActivity(intent);
+                    overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
+                }
             }
         });
 
@@ -151,28 +173,33 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
 
     private void initToolbar(String title) {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
-        setSupportActionBar(toolbar);
-        if(getSupportActionBar()!=null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
+        if (toolbar != null) {
+            toolbar.setTitle(title);
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
-        });
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
 
     }
 
     private void initFab() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ItemsList.this, AddProduct.class);
-                startActivity(intent);
-            }
-        });
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(ItemsList.this, AddProduct.class);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
     private void jsonParser(String response, boolean pagination){

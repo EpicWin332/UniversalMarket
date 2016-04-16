@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#000"
+    tools:context=".ui.ImagePreview">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:transitionName="@string/activity_image_trans"
+        android:id="@+id/imagePreview"
+        android:layout_gravity="center_vertical"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp" />
+
+    <com.wang.avi.AVLoadingIndicatorView
+        android:id="@+id/avloadingIndicatorView"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:visibility="visible"
+        app:indicator="Pacman"
+        app:indicator_color="@android:color/holo_orange_light"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

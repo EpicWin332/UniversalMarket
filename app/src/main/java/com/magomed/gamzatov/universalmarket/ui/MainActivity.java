@@ -1,12 +1,19 @@
 package com.magomed.gamzatov.universalmarket.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -20,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initToolbar();
+        initFab();
         initListViewCategory();
     }
 
@@ -31,6 +39,20 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
+    private void initFab() {
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, AddProduct.class);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
     private void initListViewCategory() {
         ListView listViewCategory = (ListView) findViewById(R.id.listViewCategory);
         String[] list = {"Все", "Шорты", "Футболки", "Джинсы"};
@@ -40,6 +62,30 @@ public class MainActivity extends AppCompatActivity {
             listViewCategory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+//                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+//                        // previously visible view
+//                        final View myView = findViewById(R.id.fab);
+//
+//                        int cx = (myView.getLeft() + myView.getRight()) / 2;
+//                        int cy = (myView.getTop() + myView.getBottom()) / 2;
+//
+//                        int initialRadius = myView.getWidth();
+//
+//                        Animator anim =
+//                                ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+//
+//                        anim.addListener(new AnimatorListenerAdapter() {
+//                            @Override
+//                            public void onAnimationEnd(Animator animation) {
+//                                super.onAnimationEnd(animation);
+//                                myView.setVisibility(View.INVISIBLE);
+//                            }
+//                        });
+//
+//                        anim.start();
+//                    }
+
                     Intent intent = new Intent(MainActivity.this, ItemsList.class);
                     startActivity(intent);
                     overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);

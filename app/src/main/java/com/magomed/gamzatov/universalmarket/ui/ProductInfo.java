@@ -1,9 +1,13 @@
 package com.magomed.gamzatov.universalmarket.ui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -54,22 +58,39 @@ public class ProductInfo extends AppCompatActivity {
         final ImageView imageView = (ImageView) findViewById(R.id.imageView);
         avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avloadingIndicatorView);
 
-        product_brand.setText(brand);
-        product_type.setText(type);
-        product_price.setText(price);
+        if (product_brand != null) {
+            product_brand.setText(brand);
+        }
+        if (product_type != null) {
+            product_type.setText(type);
+        }
+        if (product_price != null) {
+            product_price.setText(price);
+        }
 
         volleyRequest(product_description, product_shop, product_adress, product_phone, imageView, url);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(imageLoaded) {
-                    Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
-                    intent.putExtra("image", "http://e455.azurewebsites.net/"+items.getImageUrls().get(0));
-                    startActivity(intent);
+        if (imageView != null) {
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(imageLoaded) {
+
+                        Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
+                        intent.putExtra("image", "http://e455.azurewebsites.net/" + items.getImageUrls().get(0));
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            View image = v.findViewById(R.id.imageView);
+                            Pair<View, String> pair = Pair.create(image, image.getTransitionName());
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ProductInfo.this, pair);
+                            startActivity(intent, options.toBundle());
+                        } else {
+                            startActivity(intent);
+                        }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void volleyRequest(final TextView product_description, final TextView product_shop, final TextView product_adress, final TextView product_phone, final ImageView imageView, String url) {
@@ -153,8 +174,13 @@ public class ProductInfo extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        finish();
-        overridePendingTransition(R.animator.back_in, R.animator.back_out);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            finish();
+            overridePendingTransition(R.animator.back_in, R.animator.back_out);
+        } else {
+//            supportFinishAfterTransition();
+            super.onBackPressed();
+        }
     }
 
 }

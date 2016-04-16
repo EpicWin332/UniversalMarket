@@ -4,4 +4,8 @@
     <string name="title_activity_items_list">ItemsList</string>
     <string name="title_activity_product_info">ProductInfo</string>
     <string name="title_activity_add_product">AddProduct</string>
+    <string name="activity_name_trans">activity_name_trans</string>
+    <string name="activity_price_trans">activity_price_trans</string>
+    <string name="activity_image_trans">activity_image_trans</string>
+    <string name="activity_layout_trans">activity_layout_trans</string>
 </resources>

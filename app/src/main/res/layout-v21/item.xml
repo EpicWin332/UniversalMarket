@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:id="@+id/linearLayout"
     >
     <android.support.v7.widget.CardView
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -10,6 +11,7 @@
         android:id="@+id/cv"
         card_view:cardUseCompatPadding="true"
         card_view:cardCornerRadius="4dp"
+        android:transitionName="@string/activity_layout_trans"
         card_view:cardElevation = "4dp">
         <RelativeLayout
             android:layout_width="match_parent"
@@ -20,6 +22,7 @@
                 android:layout_height="160dp"
                 android:id="@+id/item_photo"
                 android:scaleType="centerCrop"
+                android:transitionName="@string/activity_image_trans"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true" />
             <TextView
@@ -28,6 +31,7 @@
                 android:id="@+id/item_name"
                 android:textSize="30sp"
                 android:singleLine="true"
+                android:transitionName="@string/activity_name_trans"
                 android:layout_below="@+id/item_photo" />
             <TextView
                 android:layout_width="wrap_content"
@@ -35,6 +39,7 @@
                 android:id="@+id/item_description"
                 android:singleLine="true"
                 android:textSize="17sp"
+                android:transitionName="@string/activity_price_trans"
                 android:layout_below="@+id/item_name" />
         </RelativeLayout>
     </android.support.v7.widget.CardView>

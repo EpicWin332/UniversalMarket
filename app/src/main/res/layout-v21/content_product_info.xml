@@ -8,7 +8,15 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".ui.ProductInfo"
     tools:showIn="@layout/activity_product_info">
-
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cv"
+        card_view:cardUseCompatPadding="true"
+        card_view:cardCornerRadius="4dp"
+        android:transitionName="@string/activity_layout_trans"
+        card_view:cardElevation = "4dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -29,7 +37,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin">
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:padding="10dp">
 
 
             <ImageView
@@ -46,6 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="30sp"
+                android:transitionName="@string/activity_name_trans"
                 tools:text="name" />
 
             <TextView
@@ -61,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:textSize="17sp"
+                android:transitionName="@string/activity_price_trans"
                 tools:text="name" />
 
             <LinearLayout
@@ -110,5 +121,6 @@
 
         </LinearLayout>
     </RelativeLayout>
+    </android.support.v7.widget.CardView>
 
 </ScrollView>
