@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,8 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -45,11 +48,13 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     private AVLoadingIndicatorView avLoadingIndicatorView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView rv;
+    private FloatingActionButton fab;
     private RequestQueue requestQueue;
     private RVAdapter adapter;
     private int limit = 6;
     private int offset = 0;
     private String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getProducts?limit="+limit+"&offset=";
+    private boolean clickable = true;
 
     private boolean loading = true;
     private int pastVisiblesItems, visibleItemCount, totalItemCount;
@@ -118,29 +123,35 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         ItemClickSupport.addTo(rv).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Intent intent = new Intent(ItemsList.this, ProductInfo.class);
-                intent.putExtra("brand", items.get(position).getName());
-                intent.putExtra("type", items.get(position).getType());
-                intent.putExtra("price", items.get(position).getDescription());
-                intent.putExtra("id", items.get(position).getId());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    View textViewName = v.findViewById(R.id.item_name);
-                    View textViewPrice = v.findViewById(R.id.item_description);
-                    View view = v.findViewById(R.id.cv);
-                    View image = v.findViewById(R.id.item_photo);
+                if(clickable) {
+                    clickable = false;
+                    Intent intent = new Intent(ItemsList.this, ProductInfo.class);
+                    intent.putExtra("brand", items.get(position).getName());
+                    intent.putExtra("type", items.get(position).getType());
+                    intent.putExtra("price", items.get(position).getDescription());
+                    intent.putExtra("id", items.get(position).getId());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        View textViewName = v.findViewById(R.id.item_name);
+                        View textViewPrice = v.findViewById(R.id.item_description);
+                        View view = v.findViewById(R.id.cv);
+                        View image = v.findViewById(R.id.item_photo);
+                        View toolbar = findViewById(R.id.toolbar);
 
-                    Pair<View, String> pair1 = Pair.create(textViewName, textViewName.getTransitionName());
-                    Pair<View, String> pair2 = Pair.create(textViewPrice, textViewPrice.getTransitionName());
-                    Pair<View, String> pair3 = Pair.create(view, view.getTransitionName());
-                    Pair<View, String> pair4 = Pair.create(image, image.getTransitionName());
+                        Pair<View, String> pair1 = Pair.create(textViewName, textViewName.getTransitionName());
+                        Pair<View, String> pair2 = Pair.create(textViewPrice, textViewPrice.getTransitionName());
+                        Pair<View, String> pair3 = Pair.create(view, view.getTransitionName());
+                        Pair<View, String> pair4 = Pair.create(image, image.getTransitionName());
+                        Pair<View, String> pair5 = Pair.create(toolbar, toolbar.getTransitionName());
 
-                    ActivityOptionsCompat options = ActivityOptionsCompat.
-                            makeSceneTransitionAnimation(ItemsList.this, pair2, pair1, pair3, pair4);
-                    startActivity(intent, options.toBundle());
-                }
-                else {
-                    startActivity(intent);
-                    overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
+                        ActivityOptionsCompat options = ActivityOptionsCompat.
+                                makeSceneTransitionAnimation(ItemsList.this, pair2, pair1, pair3, pair4, pair5,
+                                        Pair.create(findViewById(android.R.id.statusBarBackground), Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME),
+                                        Pair.create(findViewById(android.R.id.navigationBarBackground), Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME));
+                        startActivity(intent, options.toBundle());
+                    } else {
+                        startActivity(intent);
+                        overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
+                    }
                 }
             }
         });
@@ -166,9 +177,25 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                         }
                     }
                 }
+
+                if(fab != null) {
+                    if (dy > 0 && fab.isShown()) {
+                        fab.hide();
+                    }
+                    else if (dy < 0 && !fab.isShown()) {
+                        fab.show();
+                    }
+                }
             }
         });
 
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        clickable = true;
     }
 
     private void initToolbar(String title) {
@@ -190,8 +217,9 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     }
 
     private void initFab() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         if (fab != null) {
+            fab.hide();
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -199,6 +227,13 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                     startActivity(intent);
                 }
             });
+            Timer timer=new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                        fab.show();
+                }
+            }, 300);
         }
     }
 
@@ -279,6 +314,9 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
 
     @Override
     public void onBackPressed() {
+        if(fab!=null){
+            fab.hide();
+        }
         finish();
         overridePendingTransition(R.animator.back_in, R.animator.back_out);
     }

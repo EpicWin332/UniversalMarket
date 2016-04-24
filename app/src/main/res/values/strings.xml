@@ -8,4 +8,5 @@
     <string name="activity_price_trans">activity_price_trans</string>
     <string name="activity_image_trans">activity_image_trans</string>
     <string name="activity_layout_trans">activity_layout_trans</string>
+    <string name="activity_toolbar_trans">activity_toolbar_trans</string>
 </resources>

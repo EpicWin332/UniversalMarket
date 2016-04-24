@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.widget.AdapterView;
@@ -20,7 +21,12 @@ import android.widget.ListView;
 
 import com.magomed.gamzatov.universalmarket.R;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
+
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +35,21 @@ public class MainActivity extends AppCompatActivity {
         initToolbar();
         initFab();
         initListViewCategory();
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        Timer timer=new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(fab!=null){
+                    fab.show();
+                }
+            }
+        }, 300);
     }
 
     private void initToolbar() {
@@ -40,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initFab() {
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
 
         if (fab != null) {
             fab.setOnClickListener(new View.OnClickListener() {
@@ -62,30 +83,9 @@ public class MainActivity extends AppCompatActivity {
             listViewCategory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-//                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-//                        // previously visible view
-//                        final View myView = findViewById(R.id.fab);
-//
-//                        int cx = (myView.getLeft() + myView.getRight()) / 2;
-//                        int cy = (myView.getTop() + myView.getBottom()) / 2;
-//
-//                        int initialRadius = myView.getWidth();
-//
-//                        Animator anim =
-//                                ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
-//
-//                        anim.addListener(new AnimatorListenerAdapter() {
-//                            @Override
-//                            public void onAnimationEnd(Animator animation) {
-//                                super.onAnimationEnd(animation);
-//                                myView.setVisibility(View.INVISIBLE);
-//                            }
-//                        });
-//
-//                        anim.start();
-//                    }
-
+                    if(fab!=null){
+                        fab.hide();
+                    }
                     Intent intent = new Intent(MainActivity.this, ItemsList.class);
                     startActivity(intent);
                     overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);

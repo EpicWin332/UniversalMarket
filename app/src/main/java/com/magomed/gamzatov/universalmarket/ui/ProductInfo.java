@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +39,23 @@ public class ProductInfo extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_info);
+
+        // Postpone the transition until the window's decor view has
+        // finished its layout.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            postponeEnterTransition();
+            final View decor = getWindow().getDecorView();
+            decor.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        startPostponedEnterTransition();
+                    }
+                    return true;
+                }
+            });
+        }
 
         Intent intent = getIntent();
         final String brand = intent.getStringExtra("brand");
@@ -178,7 +196,8 @@ public class ProductInfo extends AppCompatActivity {
             finish();
             overridePendingTransition(R.animator.back_in, R.animator.back_out);
         } else {
-//            supportFinishAfterTransition();
+            supportFinishAfterTransition();
+            //finishAfterTransition();
             super.onBackPressed();
         }
     }
