@@ -11,6 +11,8 @@ import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -97,14 +99,14 @@ public class ProductInfo extends AppCompatActivity {
                         Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
                         intent.putExtra("image", "http://e455.azurewebsites.net/" + items.getImageUrls().get(0));
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            View image = v.findViewById(R.id.imageView);
-                            Pair<View, String> pair = Pair.create(image, image.getTransitionName());
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ProductInfo.this, pair);
-                            startActivity(intent, options.toBundle());
-                        } else {
-                            startActivity(intent);
-                        }
+////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+////                            View image = v.findViewById(R.id.imageView);
+////                            Pair<View, String> pair = Pair.create(image, image.getTransitionName());
+////                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ProductInfo.this, pair);
+////                            startActivity(intent, options.toBundle());
+////                        } else {
+                             startActivity(intent);
+////                        }
                     }
                 }
             });
@@ -169,16 +171,20 @@ public class ProductInfo extends AppCompatActivity {
 
     private void initToolbar(String title) {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
+        if (toolbar != null) {
+            toolbar.setTitle(title);
+        }
         setSupportActionBar(toolbar);
         if(getSupportActionBar()!=null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        if (toolbar != null) {
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
     }
 
 
@@ -197,7 +203,6 @@ public class ProductInfo extends AppCompatActivity {
             overridePendingTransition(R.animator.back_in, R.animator.back_out);
         } else {
             supportFinishAfterTransition();
-            //finishAfterTransition();
             super.onBackPressed();
         }
     }

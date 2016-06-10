@@ -6,6 +6,8 @@ import android.content.Context;
 public class MyApplication extends Application {
 
     private static MyApplication sInstance;
+    private static String login;
+    private static String password;
 
     @Override
     public void onCreate() {
@@ -19,5 +21,21 @@ public class MyApplication extends Application {
 
     public static Context getAppContext(){
         return sInstance.getApplicationContext();
+    }
+
+    public static String getLogin() {
+        return login;
+    }
+
+    public static void setLogin(String login) {
+        MyApplication.login = login;
+    }
+
+    public static String getPassword() {
+        return password;
+    }
+
+    public static void setPassword(String password) {
+        MyApplication.password = password;
     }
 }

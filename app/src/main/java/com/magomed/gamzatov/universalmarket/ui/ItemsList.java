@@ -1,6 +1,9 @@
 package com.magomed.gamzatov.universalmarket.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -16,6 +19,7 @@ import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,17 +45,23 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import eightbitlab.com.blurview.BlurView;
+import eightbitlab.com.blurview.RenderScriptBlur;
+import jp.co.recruit_lifestyle.android.widget.WaveSwipeRefreshLayout;
+
 public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final int MY_SOCKET_TIMEOUT_MS = 60_000;
     private List<Item> items = new ArrayList<>();
     private AVLoadingIndicatorView avLoadingIndicatorView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    //private SwipeRefreshLayout mSwipeRefreshLayout;
+    private WaveSwipeRefreshLayout mWaveSwipeRefreshLayout;
     private RecyclerView rv;
     private FloatingActionButton fab;
     private RequestQueue requestQueue;
     private RVAdapter adapter;
-    private int limit = 6;
+    Toolbar toolbar;
+    private int limit = 20;
     private int offset = 0;
     private String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getProducts?limit="+limit+"&offset=";
     private boolean clickable = true;
@@ -66,10 +76,25 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         initToolbar("Все");
         initFab();
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
-        if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.setOnRefreshListener(this);
+//        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+//        if (mSwipeRefreshLayout != null) {
+//            mSwipeRefreshLayout.setOnRefreshListener(this);
+//        }
+
+        mWaveSwipeRefreshLayout = (WaveSwipeRefreshLayout) findViewById(R.id.main_swipe);
+        if (mWaveSwipeRefreshLayout != null) {
+            mWaveSwipeRefreshLayout.setColorSchemeColors(Color.WHITE, Color.WHITE);
+            mWaveSwipeRefreshLayout.setWaveColor(Color.argb(255,63,81,181));
+//            mWaveSwipeRefreshLayout.setWaveARGBColor(255,63,81,181);
+//            mWaveSwipeRefreshLayout.setColorSchemeColors(R.color.colorWhite);
+//            mWaveSwipeRefreshLayout.setColorSchemeResources(R.id.toolbar);
         }
+        mWaveSwipeRefreshLayout.setOnRefreshListener(new WaveSwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                // Do work to refresh the list here.
+                moreData(false);
+            }
+        });
 
         rv = (RecyclerView) findViewById(R.id.rv);
         if (rv != null) {
@@ -192,14 +217,14 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     }
 
     @Override
-    protected void onStart(){
-        super.onStart();
+    protected void onResume(){
+        super.onResume();
 
         clickable = true;
     }
 
     private void initToolbar(String title) {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setTitle(title);
             setSupportActionBar(toolbar);
@@ -223,7 +248,14 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(ItemsList.this, AddProduct.class);
+                    Intent intent;
+                    SharedPreferences sPref = getSharedPreferences("cookies", MODE_PRIVATE);
+
+                    if(sPref.getString("cookie", "").equals("")){
+                        intent = new Intent(ItemsList.this, Login.class);
+                    } else {
+                        intent = new Intent(ItemsList.this, AddProduct.class);
+                    }
                     startActivity(intent);
                 }
             });
@@ -276,7 +308,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         } else {
             offset = 0;
             // начинаем показывать прогресс
-            mSwipeRefreshLayout.setRefreshing(true);
+            //mSwipeRefreshLayout.setRefreshing(true);
         }
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url+offset, new Response.Listener<String>() {
             @Override
@@ -288,14 +320,20 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                 }
                 jsonParser(response, pagination);
                 Log.d("refresh", "end");
-                mSwipeRefreshLayout.setRefreshing(false);
-                adapter.notifyItemInserted(items.size());
+                //mSwipeRefreshLayout.setRefreshing(false);
+                mWaveSwipeRefreshLayout.setRefreshing(false);
+                if(pagination) {
+                    adapter.notifyItemInserted(items.size());
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d("refresh", "end");
-                mSwipeRefreshLayout.setRefreshing(false);
+                //mSwipeRefreshLayout.setRefreshing(false);
+                mWaveSwipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_LONG).show();
                 loading = true;
                 if(pagination){

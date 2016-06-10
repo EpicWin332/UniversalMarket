@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -25,7 +26,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.magomed.gamzatov.universalmarket.R;
-import com.magomed.gamzatov.universalmarket.entity.FileUploadService;
+import com.magomed.gamzatov.universalmarket.network.FileUploadService;
 import com.magomed.gamzatov.universalmarket.network.ServiceGenerator;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -99,90 +100,99 @@ public class AddProduct extends AppCompatActivity {
         });
 
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if (button != null) {
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-                if(isEmpty(editBrand)){
-                    Toast.makeText(AddProduct.this, "Не заполнен бренд", Toast.LENGTH_SHORT).show();
-                    return;
-                } else if(isEmpty(editPrice)){
-                    Toast.makeText(AddProduct.this, "Не заполнена цена", Toast.LENGTH_SHORT).show();
-                    return;
-                } else if(isEmpty(editDescription)){
-                    Toast.makeText(AddProduct.this, "Не заполнено описание", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                imageButton.setEnabled(false);
-                button.setEnabled(false);
-                startAnim();
-
-                FileUploadService service = ServiceGenerator.createService(FileUploadService.class);
-
-                HashMap<String,RequestBody> map=new HashMap<>();
-                RequestBody file=null;
-                File f=null;
-
-                if(photoAdded) {
-                    //for(int i=0,size=listOfNames.size(); i<size;i++){
-                    try {
-                        f = new File(getApplicationContext().getCacheDir(), "file1.jpg");
-                        FileOutputStream fos = new FileOutputStream(f);
-                        //Bitmap bitmap = bitmapList.get(0);
-                        Bitmap bitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
-                        if (bitmap != null) {
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 99 /*ignored for PNG*/, fos);
-                            fos.flush();
-                            fos.close();
-                        } else {
-                            return;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    if(isEmpty(editBrand)){
+                        Toast.makeText(AddProduct.this, "Не заполнен бренд", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if(isEmpty(editPrice)){
+                        Toast.makeText(AddProduct.this, "Не заполнена цена", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if(isEmpty(editDescription)){
+                        Toast.makeText(AddProduct.this, "Не заполнено описание", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    file = RequestBody.create(MediaType.parse("multipart/form-data"), f);
-                    map.put("file\"; filename=\"file1\"; fileExtension=\"jpg\"; ", file);
-                    file = null;
-                    f = null;
-                    //}
-                }
+                    imageButton.setEnabled(false);
+                    button.setEnabled(false);
+                    startAnim();
 
-                RequestBody description = RequestBody.create(MediaType.parse("multipart/form-data"), editDescription.getText().toString());
-                RequestBody brand = RequestBody.create(MediaType.parse("multipart/form-data"), editBrand.getText().toString());
-                RequestBody typeId = RequestBody.create(MediaType.parse("multipart/form-data"), "1");
-                RequestBody shopId = RequestBody.create(MediaType.parse("multipart/form-data"), "1");
-                RequestBody price = RequestBody.create(MediaType.parse("multipart/form-data"), editPrice.getText().toString());
+                    FileUploadService service = ServiceGenerator.createService(FileUploadService.class);
 
-                service.uploadImage(map, description, brand, typeId, shopId, price).enqueue(new Callback<String>() {
-                    @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
-                        Log.v("Upload", "success " + response.code());
-                        imageButton.setEnabled(true);
-                        button.setEnabled(true);
-                        stopAnim();
-                        if(response.code()==200) {
-                            Toast.makeText(AddProduct.this, "Успешно добавлено", Toast.LENGTH_SHORT).show();
-                            onBackPressed();
+                    HashMap<String,RequestBody> map=new HashMap<>();
+                    RequestBody file=null;
+                    File f=null;
+
+                    if(photoAdded) {
+                        //for(int i=0,size=listOfNames.size(); i<size;i++){
+                        try {
+                            f = new File(getApplicationContext().getCacheDir(), "file1.jpg");
+                            FileOutputStream fos = new FileOutputStream(f);
+                            //Bitmap bitmap = bitmapList.get(0);
+                            Bitmap bitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+                            if (bitmap != null) {
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 99 /*ignored for PNG*/, fos);
+                                fos.flush();
+                                fos.close();
+                            } else {
+                                return;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return;
                         }
-                        else
+
+                        file = RequestBody.create(MediaType.parse("multipart/form-data"), f);
+                        map.put("file\"; filename=\"file1\"; fileExtension=\"jpg\"; ", file);
+                        file = null;
+                        f = null;
+                        //}
+                    }
+
+                    RequestBody description = RequestBody.create(MediaType.parse("multipart/form-data"), editDescription.getText().toString());
+                    RequestBody brand = RequestBody.create(MediaType.parse("multipart/form-data"), editBrand.getText().toString());
+                    RequestBody typeId = RequestBody.create(MediaType.parse("multipart/form-data"), "1");
+                    RequestBody shopId = RequestBody.create(MediaType.parse("multipart/form-data"), "1");
+                    RequestBody price = RequestBody.create(MediaType.parse("multipart/form-data"), editPrice.getText().toString());
+
+                    SharedPreferences sharedPreferences = getSharedPreferences("cookies", MODE_PRIVATE);
+                    String cookie = sharedPreferences.getString("cookie", "");
+
+                    Log.d("cookie", cookie);
+
+                    service.uploadImage(cookie, map, description, brand, typeId, shopId, price).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(Call<String> call, Response<String> response) {
+                            Log.v("Upload", "success " + response.code());
+                            imageButton.setEnabled(true);
+                            button.setEnabled(true);
+                            stopAnim();
+                            if(response.code()==200) {
+                                Toast.makeText(AddProduct.this, "Успешно добавлено", Toast.LENGTH_SHORT).show();
+                                onBackPressed();
+                            }
+                            else {
+                                Toast.makeText(AddProduct.this, "При добавлении возникла ошибка", Toast.LENGTH_SHORT).show();
+                                Log.d("onResponse", response.code() + " " + response.message()+ " " + response.body());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<String> call, Throwable t) {
+                            Log.e("Upload", t.getMessage());
+                            imageButton.setEnabled(true);
+                            button.setEnabled(true);
+                            stopAnim();
                             Toast.makeText(AddProduct.this, "При добавлении возникла ошибка", Toast.LENGTH_SHORT).show();
-                    }
+                        }
+                    });
 
-                    @Override
-                    public void onFailure(Call<String> call, Throwable t) {
-                        Log.e("Upload", t.getMessage());
-                        imageButton.setEnabled(true);
-                        button.setEnabled(true);
-                        stopAnim();
-                        Toast.makeText(AddProduct.this, "При добавлении возникла ошибка", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            }
-        });
+                }
+            });
+        }
     }
 
     private boolean isEmpty(EditText myEditText) {
@@ -217,17 +227,21 @@ public class AddProduct extends AppCompatActivity {
 
     private void initToolbar(String title) {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
+        if (toolbar != null) {
+            toolbar.setTitle(title);
+        }
         setSupportActionBar(toolbar);
 
         if(getSupportActionBar()!=null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        if (toolbar != null) {
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
     }
 
     private void dispatchTakePictureIntent() {

@@ -9,4 +9,11 @@
     <string name="activity_image_trans">activity_image_trans</string>
     <string name="activity_layout_trans">activity_layout_trans</string>
     <string name="activity_toolbar_trans">activity_toolbar_trans</string>
+    <string name="title_activity_authorization">Authorization</string>
+    <string name="login">Вход</string>
+    <string name="title_activity_login">Login</string>
+    <string name="title_activity_test">test</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

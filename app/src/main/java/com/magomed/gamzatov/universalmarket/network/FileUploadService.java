@@ -1,9 +1,10 @@
-package com.magomed.gamzatov.universalmarket.entity;
+package com.magomed.gamzatov.universalmarket.network;
 
 import java.util.Map;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -15,7 +16,8 @@ import retrofit2.http.PartMap;
 public interface FileUploadService {
     @Multipart
     @POST("/TestTomcat-1.0-SNAPSHOT/setProduct")
-    Call<String> uploadImage(@PartMap() Map<String, RequestBody> mapFileAndName,
+    Call<String> uploadImage(@Header("Cookie") String cookie,
+                             @PartMap() Map<String, RequestBody> mapFileAndName,
                              @Part("description") RequestBody description,
                              @Part("brand") RequestBody brand,
                              @Part("typeId") RequestBody typeId,

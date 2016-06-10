@@ -57,9 +57,21 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.ItemsList" />
         </activity>
-        <activity android:name=".ui.ImagePreview"
-            android:theme="@style/AppTheme.NoActionBar.TransparentStatus">
-        </activity>
+        <activity
+            android:name=".ui.ImagePreview"
+            android:theme="@style/AppTheme.NoActionBar.TransparentStatus" />
+        <activity
+            android:name=".ui.Registration"
+            android:label="@string/title_activity_authorization"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.Login"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.test"
+            android:label="@string/title_activity_test"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

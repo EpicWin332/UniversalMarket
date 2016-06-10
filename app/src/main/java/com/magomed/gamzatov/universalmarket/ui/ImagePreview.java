@@ -1,5 +1,6 @@
 package com.magomed.gamzatov.universalmarket.ui;
 
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -49,7 +50,7 @@ public class ImagePreview extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 stopAnim();
                 if (imagePreview != null) {
-                    imagePreview.setImageResource(R.mipmap.no_image);
+                    imagePreview.setBackgroundResource(R.mipmap.no_image);
                 }
                 Toast.makeText(ImagePreview.this , "Error " + error, Toast.LENGTH_LONG).show();
             }
@@ -63,6 +64,21 @@ public class ImagePreview extends AppCompatActivity {
 
     private void stopAnim(){
         avLoadingIndicatorView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mAttacher.cleanup();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            supportFinishAfterTransition();
+        }
+        super.onBackPressed();
     }
 
 

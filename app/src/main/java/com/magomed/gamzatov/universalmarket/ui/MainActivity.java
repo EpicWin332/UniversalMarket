@@ -3,6 +3,7 @@ package com.magomed.gamzatov.universalmarket.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +24,9 @@ import com.magomed.gamzatov.universalmarket.R;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import eightbitlab.com.blurview.BlurView;
+import eightbitlab.com.blurview.RenderScriptBlur;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, AddProduct.class);
+                    Intent intent = new Intent(MainActivity.this, Login.class);
                     startActivity(intent);
                 }
             });
