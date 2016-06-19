@@ -248,24 +248,20 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent;
-                    SharedPreferences sPref = getSharedPreferences("cookies", MODE_PRIVATE);
-
-                    if(sPref.getString("cookie", "").equals("")){
-                        intent = new Intent(ItemsList.this, Login.class);
-                    } else {
-                        intent = new Intent(ItemsList.this, AddProduct.class);
-                    }
+                    Intent intent = new Intent(ItemsList.this, AddProduct.class);
                     startActivity(intent);
                 }
             });
-            Timer timer=new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
+            SharedPreferences sPref = getSharedPreferences("cookies", MODE_PRIVATE);
+            if(!sPref.getString("cookie", "").equals("")) {
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
                         fab.show();
-                }
-            }, 300);
+                    }
+                }, 300);
+            }
         }
     }
 

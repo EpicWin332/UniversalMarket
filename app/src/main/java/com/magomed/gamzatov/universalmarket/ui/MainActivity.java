@@ -3,12 +3,17 @@ package com.magomed.gamzatov.universalmarket.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -18,6 +23,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.magomed.gamzatov.universalmarket.R;
@@ -28,9 +34,11 @@ import java.util.TimerTask;
 import eightbitlab.com.blurview.BlurView;
 import eightbitlab.com.blurview.RenderScriptBlur;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private FloatingActionButton fab;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,21 +47,27 @@ public class MainActivity extends AppCompatActivity {
         initToolbar();
         initFab();
         initListViewCategory();
+        initNavHeader();
     }
 
     @Override
     protected void onStart(){
         super.onStart();
 
-        Timer timer=new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if(fab!=null){
-                    fab.show();
+        SharedPreferences sPref = getSharedPreferences("cookies", MODE_PRIVATE);
+        if(sPref.getString("cookie", "").equals("")){
+            fab.hide();
+        } else {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (fab != null) {
+                        fab.show();
+                    }
                 }
-            }
-        }, 300);
+            }, 300);
+        }
     }
 
     private void initToolbar() {
@@ -62,6 +76,19 @@ public class MainActivity extends AppCompatActivity {
             toolbar.setTitle("Категории");
         }
         setSupportActionBar(toolbar);
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        if (drawer != null) {
+            drawer.setDrawerListener(toggle);
+        }
+        toggle.syncState();
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        }
     }
 
     private void initFab() {
@@ -71,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, Login.class);
+                    Intent intent = new Intent(MainActivity.this, AddProduct.class);
                     startActivity(intent);
                 }
             });
@@ -98,6 +125,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void initNavHeader() {
+        if (navigationView != null) {
+            View headerView = navigationView.getHeaderView(0);
+            LinearLayout navHeader = (LinearLayout) headerView.findViewById(R.id.navHeader);
+            if (navHeader != null) {
+                navHeader.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, Login.class);
+                        startActivity(intent);
+                        drawer.closeDrawer(GravityCompat.START);
+                    }
+                });
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -114,9 +158,30 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            SharedPreferences sPref = getSharedPreferences("cookies", MODE_PRIVATE);
+            SharedPreferences.Editor ed = sPref.edit();
+            ed.putString("cookie", "");
+            ed.apply();
+            fab.hide();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+
     }
 }
