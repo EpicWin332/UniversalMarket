@@ -16,4 +16,15 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Пароль</string>
+    <string name="action_sign_in_short">Вход</string>
+    <string name="button_login">Войти</string>
+    <string name="button_singup">Зарегистрироваться</string>
+    <string name="activity_add_product_brand">Бренд</string>
+    <string name="activity_add_product_price">Цена</string>
+    <string name="activity_add_product_description">Описание</string>
+    <string name="activity_add_product_add">Добавить</string>
+
+    <string name="nav_header">Войти или \nзарегистирироваться</string>
 </resources>

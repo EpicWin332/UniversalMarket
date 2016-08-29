@@ -1,4 +1,4 @@
-package com.magomed.gamzatov.universalmarket.ui;
+package com.magomed.gamzatov.universalmarket.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -9,20 +9,24 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.magomed.gamzatov.universalmarket.R;
@@ -38,7 +42,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -51,57 +57,76 @@ public class AddProduct extends AppCompatActivity {
     private static final int REQUEST_CODE_SOME_FEATURES_PERMISSIONS = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
     private static final int RESULT_LOAD_IMG = 3;
-    private String mCurrentPhotoPath;
-    String imgDecodableString;
-    ImageView imageButton;
-    boolean photoAdded=false;
-    private AVLoadingIndicatorView avLoadingIndicatorView;
+    private static final int MAX_PHOTO_NUMBER = 3;
 
+    private String mCurrentPhotoPath;
+    private ImageView photoButton;
+    private AVLoadingIndicatorView avLoadingIndicatorView;
+    private Button addButton;
+    private EditText editBrand;
+    private EditText editPrice;
+    private EditText editDescription;
+    private ImageView clickedImageView;
+    private LinearLayout containerLayout;
+    private Set<ImageView> photoViewSet = new LinkedHashSet<>();
+    private int totalImagePicker = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
         initToolbar("Добавление");
-        imageButton = (ImageView) findViewById(R.id.imageView2);
-        final Button button = (Button) findViewById(R.id.button);
-        final EditText editBrand = (EditText) findViewById(R.id.editBrand);
-        final EditText editPrice = (EditText) findViewById(R.id.editPrice);
-        final EditText editDescription = (EditText) findViewById(R.id.editDescription);
+        photoButton = (ImageView) findViewById(R.id.photoView);
+        addButton = (Button) findViewById(R.id.addButton);
+        editBrand = (EditText) findViewById(R.id.editBrand);
+        editPrice = (EditText) findViewById(R.id.editPrice);
+        editDescription = (EditText) findViewById(R.id.editDescription);
         avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avloadingIndicatorView);
+        containerLayout = (LinearLayout) findViewById(R.id.container);
 
         stopAnim();
+        setFont();
+        addImageOnClickListener(photoButton);
+        addButtonOnClickListener();
+    }
 
-        imageButton.setOnClickListener(new View.OnClickListener() {
+    private void addImagePicker() {
 
+        totalImagePicker++;
+        final LayoutInflater layoutInflater = getLayoutInflater();
+        final View addView = layoutInflater.inflate(R.layout.row_add_image, containerLayout, false);
+        final ImageView imageButton = (ImageView) addView.findViewById(R.id.photoView);
+        ImageView cancealAddImage = (ImageView) addView.findViewById(R.id.cancelAddImage);
+
+        cancealAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(AddProduct.this);
-                // Add the buttons
-                builder.setPositiveButton("Сделать фото", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            photoPermissons();
-                        } else {
-                            dispatchTakePictureIntent();
-                        }
-                    }
-                });
-                builder.setNegativeButton("Взять из галереи", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                totalImagePicker--;
+                photoViewSet.remove(imageButton);
+                ((LinearLayout)addView.getParent()).removeView(addView);
+                if(totalImagePicker<=1) {
+                    addImagePicker();
+                }
             }
         });
 
+        addImageOnClickListener(imageButton);
+        containerLayout.addView(addView);
+    }
 
-        if (button != null) {
-            button.setOnClickListener(new View.OnClickListener() {
+    private void setFont() {
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/LatoLight.ttf");
+        editBrand.setTypeface(custom_font);
+        editPrice.setTypeface(custom_font);
+        editDescription.setTypeface(custom_font);
+
+        Typeface custom_font1 = Typeface.createFromAsset(getAssets(), "fonts/LatoRegular.ttf");
+        addButton.setTypeface(custom_font1);
+    }
+
+    private void addButtonOnClickListener() {
+        if (addButton != null) {
+            addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -116,8 +141,8 @@ public class AddProduct extends AppCompatActivity {
                         return;
                     }
 
-                    imageButton.setEnabled(false);
-                    button.setEnabled(false);
+                    photoButton.setEnabled(false);
+                    addButton.setEnabled(false);
                     startAnim();
 
                     FileUploadService service = ServiceGenerator.createService(FileUploadService.class);
@@ -125,14 +150,13 @@ public class AddProduct extends AppCompatActivity {
                     HashMap<String,RequestBody> map=new HashMap<>();
                     RequestBody file=null;
                     File f=null;
-
-                    if(photoAdded) {
-                        //for(int i=0,size=listOfNames.size(); i<size;i++){
+                    int i = 0;
+                    for (ImageView photoView : photoViewSet) {
+                        i++;
                         try {
-                            f = new File(getApplicationContext().getCacheDir(), "file1.jpg");
+                            f = new File(getApplicationContext().getCacheDir(), "file" + i + ".jpg");
                             FileOutputStream fos = new FileOutputStream(f);
-                            //Bitmap bitmap = bitmapList.get(0);
-                            Bitmap bitmap = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+                            Bitmap bitmap = ((BitmapDrawable) photoView.getDrawable()).getBitmap();
                             if (bitmap != null) {
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 99 /*ignored for PNG*/, fos);
                                 fos.flush();
@@ -146,10 +170,9 @@ public class AddProduct extends AppCompatActivity {
                         }
 
                         file = RequestBody.create(MediaType.parse("multipart/form-data"), f);
-                        map.put("file\"; filename=\"file1\"; fileExtension=\"jpg\"; ", file);
+                        map.put("file\"; filename=\"file" + i +"\"; fileExtension=\"jpg\"; ", file);
                         file = null;
                         f = null;
-                        //}
                     }
 
                     RequestBody description = RequestBody.create(MediaType.parse("multipart/form-data"), editDescription.getText().toString());
@@ -167,8 +190,8 @@ public class AddProduct extends AppCompatActivity {
                         @Override
                         public void onResponse(Call<String> call, Response<String> response) {
                             Log.v("Upload", "success " + response.code());
-                            imageButton.setEnabled(true);
-                            button.setEnabled(true);
+                            photoButton.setEnabled(true);
+                            addButton.setEnabled(true);
                             stopAnim();
                             if(response.code()==200) {
                                 Toast.makeText(AddProduct.this, "Успешно добавлено", Toast.LENGTH_SHORT).show();
@@ -183,8 +206,8 @@ public class AddProduct extends AppCompatActivity {
                         @Override
                         public void onFailure(Call<String> call, Throwable t) {
                             Log.e("Upload", t.getMessage());
-                            imageButton.setEnabled(true);
-                            button.setEnabled(true);
+                            photoButton.setEnabled(true);
+                            addButton.setEnabled(true);
                             stopAnim();
                             Toast.makeText(AddProduct.this, "При добавлении возникла ошибка", Toast.LENGTH_SHORT).show();
                         }
@@ -195,12 +218,43 @@ public class AddProduct extends AppCompatActivity {
         }
     }
 
+    private void addImageOnClickListener(final ImageView imageView) {
+        imageView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(AddProduct.this);
+                // Add the buttons
+                builder.setPositiveButton("Сделать фото", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        clickedImageView = imageView;
+                        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            photoPermissions();
+                        } else {
+                            dispatchTakePictureIntent();
+                        }
+                    }
+                });
+                builder.setNegativeButton("Взять из галереи", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        clickedImageView = imageView;
+                        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+    }
+
     private boolean isEmpty(EditText myEditText) {
         return myEditText.getText().toString().trim().length() == 0;
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    private void photoPermissons() {
+    private void photoPermissions() {
         int hasWriteExternalPermission = checkSelfPermission( Manifest.permission.WRITE_EXTERNAL_STORAGE );
         int hasReadExternalPermission = checkSelfPermission( Manifest.permission.READ_EXTERNAL_STORAGE );
         int hasCameraPermission = checkSelfPermission( Manifest.permission.CAMERA);
@@ -292,8 +346,8 @@ public class AddProduct extends AppCompatActivity {
 
     private void setPic(String mCurrentPhotoPath) {
         // Get the dimensions of the View
-        int targetW = imageButton.getWidth();
-        int targetH = imageButton.getHeight();
+        int targetW = clickedImageView.getWidth();
+        int targetH = clickedImageView.getHeight();
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -311,9 +365,13 @@ public class AddProduct extends AppCompatActivity {
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        imageButton.setImageBitmap(bitmap);
-        imageButton.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        photoAdded=true;
+        clickedImageView.setImageBitmap(bitmap);
+        clickedImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        //photoAdded=true;
+        if(photoViewSet.size() < MAX_PHOTO_NUMBER - 1 && !photoViewSet.contains(clickedImageView)) {
+            addImagePicker();
+        }
+        photoViewSet.add(clickedImageView);
     }
 
     private void startAnim(){
@@ -323,7 +381,6 @@ public class AddProduct extends AppCompatActivity {
     private void stopAnim(){
         avLoadingIndicatorView.setVisibility(View.GONE);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -344,13 +401,15 @@ public class AddProduct extends AppCompatActivity {
                 Cursor cursor = getContentResolver().query(selectedImage,
                         filePathColumn, null, null, null);
                 // Move to first row
-                cursor.moveToFirst();
+                if (cursor != null) {
+                    cursor.moveToFirst();
 
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                imgDecodableString = cursor.getString(columnIndex);
-                cursor.close();
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    String imgDecodableString = cursor.getString(columnIndex);
+                    cursor.close();
 
-                setPic(imgDecodableString);
+                    setPic(imgDecodableString);
+                }
 
             }
         } catch (Exception e) {
@@ -360,7 +419,7 @@ public class AddProduct extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch ( requestCode ) {
             case REQUEST_CODE_SOME_FEATURES_PERMISSIONS: {
                 for( int i = 0; i < permissions.length; i++ ) {

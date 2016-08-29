@@ -1,16 +1,10 @@
-package com.magomed.gamzatov.universalmarket.ui;
+package com.magomed.gamzatov.universalmarket.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -18,27 +12,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.magomed.gamzatov.universalmarket.R;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-import eightbitlab.com.blurview.BlurView;
-import eightbitlab.com.blurview.RenderScriptBlur;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private FloatingActionButton fab;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private TextView navHeaderText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +58,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
             }, 300);
+        }
+        String email = sPref.getString("email", "");
+        if(navHeaderText!=null && !email.equals("")) {
+            navHeaderText.setText(email);
         }
     }
 
@@ -139,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
             }
+            navHeaderText = (TextView) headerView.findViewById(R.id.navHeaderText);
         }
     }
 

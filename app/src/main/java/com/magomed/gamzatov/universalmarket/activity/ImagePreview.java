@@ -1,4 +1,4 @@
-package com.magomed.gamzatov.universalmarket.ui;
+package com.magomed.gamzatov.universalmarket.activity;
 
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;

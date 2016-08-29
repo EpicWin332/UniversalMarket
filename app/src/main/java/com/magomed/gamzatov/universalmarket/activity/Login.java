@@ -1,16 +1,19 @@
-package com.magomed.gamzatov.universalmarket.ui;
+package com.magomed.gamzatov.universalmarket.activity;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.magomed.gamzatov.universalmarket.network.LoginQuery;
 
@@ -20,7 +23,6 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.List;
 
-import okhttp3.Headers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,6 +30,11 @@ import retrofit2.Response;
 public class Login extends AppCompatActivity {
 
     private AVLoadingIndicatorView avLoadingIndicatorView;
+    private EditText email;
+    private EditText password;
+    private Button login;
+    private Button singup;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +45,24 @@ public class Login extends AppCompatActivity {
         avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avloadingIndicatorView);
         stopAnim();
 
-        final EditText email = (EditText) findViewById(R.id.editEmail);
-        final EditText password = (EditText) findViewById(R.id.editPassword);
-        final Button login = (Button) findViewById(R.id.button2);
-        final Button singup = (Button) findViewById(R.id.button3);
+        email = (EditText) findViewById(R.id.editEmail);
+        password = (EditText) findViewById(R.id.editPassword);
+        login = (Button) findViewById(R.id.button2);
+        singup = (Button) findViewById(R.id.button3);
 
+        buttonsOnClick();
+        setEditLayoutClickListener();
+        setFont();
+        hideKeyboard();
+    }
+
+    private void hideKeyboard() {
+        getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        );
+    }
+
+    private void buttonsOnClick() {
         if (login != null&&singup != null) {
             login.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -93,6 +113,7 @@ public class Login extends AppCompatActivity {
                                             SharedPreferences sPref = getSharedPreferences("cookies", MODE_PRIVATE);
                                             SharedPreferences.Editor ed = sPref.edit();
                                             ed.putString("cookie", cook);
+                                            ed.putString("email", email.getText().toString());
                                             ed.apply();
 
                                             onBackPressed();
@@ -139,7 +160,43 @@ public class Login extends AppCompatActivity {
                 }
             });
         }
+    }
 
+    private void setEditLayoutClickListener() {
+        LinearLayout layoutEmail = (LinearLayout) findViewById(R.id.layoutEmail);
+        LinearLayout layoutPassword = (LinearLayout) findViewById(R.id.layoutPassword);
+
+        if (layoutEmail != null) {
+            layoutEmail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    email.requestFocusFromTouch();
+                    InputMethodManager lManager = (InputMethodManager) Login.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    lManager.showSoftInput(email, 0);
+                }
+            });
+        }
+
+        if (layoutPassword != null) {
+            layoutPassword.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.requestFocusFromTouch();
+                    InputMethodManager lManager = (InputMethodManager) Login.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    lManager.showSoftInput(password, 0);
+                }
+            });
+        }
+    }
+
+    private void setFont() {
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/LatoLight.ttf");
+        email.setTypeface(custom_font);
+        password.setTypeface(custom_font);
+
+        Typeface custom_font1 = Typeface.createFromAsset(getAssets(), "fonts/LatoRegular.ttf");
+        login.setTypeface(custom_font1);
+        singup.setTypeface(custom_font1);
     }
 
     private boolean isValidEmail(CharSequence target) {

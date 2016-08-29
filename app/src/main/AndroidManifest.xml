@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -30,46 +30,46 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.ItemsList"
+            android:name=".activity.ItemsList"
             android:label="@string/title_activity_items_list"
-            android:parentActivityName=".ui.MainActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="android.support.PARENT_ACTIVITY"
-            android:value=".ui.MainActivity" />
+            android:value=".activity.MainActivity" />
 
         <activity
-            android:name=".ui.ProductInfo"
+            android:name=".activity.ProductInfo"
             android:label="@string/title_activity_product_info"
-            android:parentActivityName=".ui.ItemsList"
+            android:parentActivityName=".activity.ItemsList"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.ItemsList" />
+                android:value=".activity.ItemsList" />
         </activity>
         <activity
-            android:name=".ui.AddProduct"
+            android:name=".activity.AddProduct"
             android:label="@string/title_activity_add_product"
-            android:parentActivityName=".ui.ItemsList"
+            android:parentActivityName=".activity.ItemsList"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.ItemsList" />
+                android:value=".activity.ItemsList" />
         </activity>
         <activity
-            android:name=".ui.ImagePreview"
+            android:name=".activity.ImagePreview"
             android:theme="@style/AppTheme.NoActionBar.TransparentStatus" />
         <activity
-            android:name=".ui.Registration"
+            android:name=".activity.Registration"
             android:label="@string/title_activity_authorization"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.Login"
+            android:name=".activity.Login"
             android:label="@string/title_activity_login"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.test"
+            android:name=".activity.test"
             android:label="@string/title_activity_test"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

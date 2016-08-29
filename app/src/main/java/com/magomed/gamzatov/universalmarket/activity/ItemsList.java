@@ -1,9 +1,8 @@
-package com.magomed.gamzatov.universalmarket.ui;
+package com.magomed.gamzatov.universalmarket.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -12,16 +11,11 @@ import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -45,8 +39,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import eightbitlab.com.blurview.BlurView;
-import eightbitlab.com.blurview.RenderScriptBlur;
 import jp.co.recruit_lifestyle.android.widget.WaveSwipeRefreshLayout;
 
 public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
@@ -65,6 +57,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     private int offset = 0;
     private String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getProducts?limit="+limit+"&offset=";
     private boolean clickable = true;
+    private boolean hideFab = false;
 
     private boolean loading = true;
     private int pastVisiblesItems, visibleItemCount, totalItemCount;
@@ -84,7 +77,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         mWaveSwipeRefreshLayout = (WaveSwipeRefreshLayout) findViewById(R.id.main_swipe);
         if (mWaveSwipeRefreshLayout != null) {
             mWaveSwipeRefreshLayout.setColorSchemeColors(Color.WHITE, Color.WHITE);
-            mWaveSwipeRefreshLayout.setWaveColor(Color.argb(255,63,81,181));
+            mWaveSwipeRefreshLayout.setWaveColor(Color.argb(255,49,67,91));
 //            mWaveSwipeRefreshLayout.setWaveARGBColor(255,63,81,181);
 //            mWaveSwipeRefreshLayout.setColorSchemeColors(R.color.colorWhite);
 //            mWaveSwipeRefreshLayout.setColorSchemeResources(R.id.toolbar);
@@ -203,7 +196,9 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                     }
                 }
 
-                if(fab != null) {
+                if(
+                        !hideFab &&
+                                fab != null) {
                     if (dy > 0 && fab.isShown()) {
                         fab.hide();
                     }
@@ -261,6 +256,8 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                         fab.show();
                     }
                 }, 300);
+            } else {
+                hideFab = true;
             }
         }
     }
