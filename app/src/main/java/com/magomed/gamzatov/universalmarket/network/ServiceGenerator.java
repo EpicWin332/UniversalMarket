@@ -7,6 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServiceGenerator {
 
     public static final String API_BASE_URL = "http://e455.azurewebsites.net";
+    public static final String API_PREFIX_URL = "/UniMarketServer-1.0";
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 

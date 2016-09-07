@@ -31,6 +31,7 @@ import com.magomed.gamzatov.universalmarket.adapter.Item;
 import com.magomed.gamzatov.universalmarket.adapter.ItemClickSupport;
 import com.magomed.gamzatov.universalmarket.adapter.RVAdapter;
 import com.magomed.gamzatov.universalmarket.entity.Items;
+import com.magomed.gamzatov.universalmarket.network.ServiceGenerator;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -55,7 +56,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     Toolbar toolbar;
     private int limit = 20;
     private int offset = 0;
-    private String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getProducts?limit="+limit+"&offset=";
+    private String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getProducts?limit="+limit+"&offset=";
     private boolean clickable = true;
     private boolean hideFab = false;
 

@@ -12,6 +12,6 @@ import retrofit2.http.Query;
 public interface LoginQuery {
 
     @FormUrlEncoded
-    @POST("/TestTomcat-1.0-SNAPSHOT/authentication")
+    @POST(ServiceGenerator.API_PREFIX_URL + "/authentication")
     Call<Void> login(@Field("email") String email, @Field("password") String password);
 }

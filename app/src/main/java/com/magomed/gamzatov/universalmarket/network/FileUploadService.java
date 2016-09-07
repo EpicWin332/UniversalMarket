@@ -15,7 +15,7 @@ import retrofit2.http.PartMap;
  */
 public interface FileUploadService {
     @Multipart
-    @POST("/TestTomcat-1.0-SNAPSHOT/setProduct")
+    @POST(ServiceGenerator.API_PREFIX_URL + "/setProduct")
     Call<String> uploadImage(@Header("Cookie") String cookie,
                              @PartMap() Map<String, RequestBody> mapFileAndName,
                              @Part("description") RequestBody description,

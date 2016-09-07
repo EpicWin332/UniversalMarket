@@ -12,6 +12,6 @@ import retrofit2.http.Query;
 public interface RegistrationQuery {
 
     //@FormUrlEncoded
-    @POST("/TestTomcat-1.0-SNAPSHOT/registration")
+    @POST(ServiceGenerator.API_PREFIX_URL+ "/registration")
     Call<String> createUser(@Query("email") String email, @Query("password") String password);
 }

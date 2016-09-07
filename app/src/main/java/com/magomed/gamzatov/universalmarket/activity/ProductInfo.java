@@ -22,6 +22,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.magomed.gamzatov.universalmarket.R;
 import com.magomed.gamzatov.universalmarket.entity.Items;
+import com.magomed.gamzatov.universalmarket.network.ServiceGenerator;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -61,7 +62,7 @@ public class ProductInfo extends AppCompatActivity {
         final int id = intent.getIntExtra("id", 0);
         initToolbar(type + " " + brand);
 
-        String url = "http://e455.azurewebsites.net/TestTomcat-1.0-SNAPSHOT/getParticularProduct?id=" + id;
+        String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getParticularProduct?id=" + id;
 
         TextView product_brand = (TextView) findViewById(R.id.product_brand);
         TextView product_type = (TextView) findViewById(R.id.product_type);
@@ -92,7 +93,7 @@ public class ProductInfo extends AppCompatActivity {
                     if(imageLoaded) {
 
                         Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
-                        intent.putExtra("image", "http://e455.azurewebsites.net/" + items.getImageUrls().get(0));
+                        intent.putExtra("image", ServiceGenerator.API_BASE_URL + "/" + items.getImageUrls().get(0));
 
 ////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 ////                            View image = v.findViewById(R.id.imageView);
@@ -121,7 +122,7 @@ public class ProductInfo extends AppCompatActivity {
                 product_adress.setText(items.getShop().getAddress());
                 product_phone.setText(items.getShop().getPhone());
 
-                String imgUrl = items.getImageUrls().isEmpty()? "" : "http://e455.azurewebsites.net/"+items.getImageUrls().get(0);
+                String imgUrl = items.getImageUrls().isEmpty()? "" : ServiceGenerator.API_BASE_URL + "/" + items.getImageUrls().get(0);
                 if(!"".equals(imgUrl)) {
                     final ImageLoader imageLoader = VolleySingleton.getsInstance().getImageLoader();
                     imageLoader.get(imgUrl, new ImageLoader.ImageListener() {
