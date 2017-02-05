@@ -1,5 +1,7 @@
 package com.magomed.gamzatov.universalmarket.adapter;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,8 +13,13 @@ import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.daimajia.slider.library.SliderLayout;
+import com.daimajia.slider.library.SliderTypes.BaseSliderView;
+import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.magomed.gamzatov.universalmarket.R;
+import com.magomed.gamzatov.universalmarket.activity.ProductInfo;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -21,18 +28,21 @@ public class RVAdapter extends RecyclerView.Adapter{
     private ImageLoader imageLoader;
     static public final int VIEW_ITEM = 1;
     static public final int VIEW_PROG = 0;
+    private Context context;
 
     public static class PersonViewHolder extends RecyclerView.ViewHolder {
         CardView cv;
         TextView itemName;
         TextView itemDescription;
         ImageView itemPhoto;
+        View itemView;
         PersonViewHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
             itemName = (TextView)itemView.findViewById(R.id.item_name);
             itemDescription = (TextView)itemView.findViewById(R.id.item_description);
             itemPhoto = (ImageView)itemView.findViewById(R.id.item_photo);
+            this.itemView = itemView;
         }
     }
 
@@ -46,7 +56,8 @@ public class RVAdapter extends RecyclerView.Adapter{
 
     List<Item> items;
 
-    public RVAdapter(List<Item> item){
+    public RVAdapter(List<Item> item, Context context){
+        this.context = context;
         this.items = item;
         VolleySingleton volleySingleton = VolleySingleton.getsInstance();
         imageLoader = volleySingleton.getImageLoader();
@@ -80,17 +91,20 @@ public class RVAdapter extends RecyclerView.Adapter{
             ((PersonViewHolder)holder).itemDescription.setText(items.get(position).description);
             String url = items.get(position).photoUrl;
             if (!"".equals(url)) {
-                imageLoader.get(url, new ImageLoader.ImageListener() {
-                    @Override
-                    public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                        ((PersonViewHolder)holder).itemPhoto.setImageBitmap(response.getBitmap());
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        ((PersonViewHolder)holder).itemPhoto.setImageResource(R.mipmap.no_image);
-                    }
-                });
+                Picasso.with(context).load(url)
+                        .error(R.mipmap.no_image)
+                        .into(((PersonViewHolder)holder).itemPhoto);
+//                imageLoader.get(url, new ImageLoader.ImageListener() {
+//                    @Override
+//                    public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+//                        ((PersonViewHolder)holder).itemPhoto.setImageBitmap(response.getBitmap());
+//                    }
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        ((PersonViewHolder)holder).itemPhoto.setImageResource(R.mipmap.no_image);
+//                    }
+//                });
             } else {
                 ((PersonViewHolder)holder).itemPhoto.setImageResource(R.mipmap.no_image);
             }

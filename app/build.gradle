@@ -35,4 +35,7 @@ dependencies {
     compile 'com.github.chrisbanes:PhotoView:1.2.6'
     compile 'com.github.recruit-lifestyle:WaveSwipeRefreshLayout:1.6'
     compile 'com.eightbitlab:blurview:1.0'
+
+    compile 'com.squareup.picasso:picasso:2.3.2'
+    compile 'com.daimajia.slider:library:1.1.5@aar'
 }

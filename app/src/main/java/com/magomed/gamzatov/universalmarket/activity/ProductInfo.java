@@ -19,6 +19,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
+import com.daimajia.slider.library.SliderLayout;
+import com.daimajia.slider.library.SliderTypes.BaseSliderView;
+import com.daimajia.slider.library.SliderTypes.TextSliderView;
+import com.daimajia.slider.library.Tricks.ViewPagerEx;
 import com.google.gson.Gson;
 import com.magomed.gamzatov.universalmarket.R;
 import com.magomed.gamzatov.universalmarket.entity.Items;
@@ -26,12 +30,13 @@ import com.magomed.gamzatov.universalmarket.network.ServiceGenerator;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
 import com.wang.avi.AVLoadingIndicatorView;
 
-public class ProductInfo extends AppCompatActivity {
+public class ProductInfo extends AppCompatActivity implements BaseSliderView.OnSliderClickListener, ViewPagerEx.OnPageChangeListener {
 
     private Items items;
     private static final int MY_SOCKET_TIMEOUT_MS = 60_000;
     private AVLoadingIndicatorView avLoadingIndicatorView;
     private boolean imageLoaded = false;
+    private SliderLayout sliderShow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +67,7 @@ public class ProductInfo extends AppCompatActivity {
         final int id = intent.getIntExtra("id", 0);
         initToolbar(type + " " + brand);
 
-        String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getParticularProduct?id=" + id;
+        String url = ServiceGenerator.API_BASE_URL + ServiceGenerator.API_PREFIX_URL + "/getParticularProduct?id=" + id;
 
         TextView product_brand = (TextView) findViewById(R.id.product_brand);
         TextView product_type = (TextView) findViewById(R.id.product_type);
@@ -71,7 +76,8 @@ public class ProductInfo extends AppCompatActivity {
         final TextView product_shop = (TextView) findViewById(R.id.product_shop);
         final TextView product_adress = (TextView) findViewById(R.id.product_adress);
         final TextView product_phone = (TextView) findViewById(R.id.product_phone);
-        final ImageView imageView = (ImageView) findViewById(R.id.imageView);
+
+        sliderShow = (SliderLayout) findViewById(R.id.slider);
         avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avloadingIndicatorView);
 
         if (product_brand != null) {
@@ -84,32 +90,10 @@ public class ProductInfo extends AppCompatActivity {
             product_price.setText(price);
         }
 
-        volleyRequest(product_description, product_shop, product_adress, product_phone, imageView, url);
-
-        if (imageView != null) {
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(imageLoaded) {
-
-                        Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
-                        intent.putExtra("image", ServiceGenerator.API_BASE_URL + "/" + items.getImageUrls().get(0));
-
-////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-////                            View image = v.findViewById(R.id.imageView);
-////                            Pair<View, String> pair = Pair.create(image, image.getTransitionName());
-////                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ProductInfo.this, pair);
-////                            startActivity(intent, options.toBundle());
-////                        } else {
-                             startActivity(intent);
-////                        }
-                    }
-                }
-            });
-        }
+        volleyRequest(product_description, product_shop, product_adress, product_phone, url);
     }
 
-    private void volleyRequest(final TextView product_description, final TextView product_shop, final TextView product_adress, final TextView product_phone, final ImageView imageView, String url) {
+    private void volleyRequest(final TextView product_description, final TextView product_shop, final TextView product_adress, final TextView product_phone, String url) {
         RequestQueue requestQueue = VolleySingleton.getsInstance().getRequestQueue();
         startAnim();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -121,29 +105,20 @@ public class ProductInfo extends AppCompatActivity {
                 product_shop.setText(items.getShop().getName());
                 product_adress.setText(items.getShop().getAddress());
                 product_phone.setText(items.getShop().getPhone());
+                stopAnim();
 
-                String imgUrl = items.getImageUrls().isEmpty()? "" : ServiceGenerator.API_BASE_URL + "/" + items.getImageUrls().get(0);
-                if(!"".equals(imgUrl)) {
-                    final ImageLoader imageLoader = VolleySingleton.getsInstance().getImageLoader();
-                    imageLoader.get(imgUrl, new ImageLoader.ImageListener() {
-                        @Override
-                        public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                            stopAnim();
-                            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                            imageView.setImageBitmap(response.getBitmap());
-                            imageLoaded = true;
-                        }
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            stopAnim();
-                            imageView.setImageResource(R.mipmap.no_image);
-                        }
-                    });
-                } else {
-                    stopAnim();
-                    imageView.setImageResource(R.mipmap.no_image);
+                for (String urlImg : items.getImageUrls()) {
+                    String imgUrl = ServiceGenerator.API_BASE_URL + "/" + urlImg;
+                    // initialize a SliderLayout
+                    sliderShow.addSlider(getSlider().image(imgUrl));
+                    sliderShow.stopAutoCycle();
+                    imageLoaded = true;
                 }
+                if(items.getImageUrls().isEmpty()) {
+                    // initialize a SliderLayout
+                    sliderShow.addSlider(getSlider().image(R.mipmap.no_image));
+                }
+                sliderShow.stopAutoCycle();
             }
         }, new Response.ErrorListener() {
             @Override
@@ -157,9 +132,25 @@ public class ProductInfo extends AppCompatActivity {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(stringRequest);
+
+
     }
 
-    private void jsonParser(String response){
+    private BaseSliderView getSlider() {
+        TextSliderView textSliderView = new TextSliderView(ProductInfo.this);
+        textSliderView
+                .description("")
+                .setScaleType(BaseSliderView.ScaleType.FitCenterCrop)
+                .setOnSliderClickListener(ProductInfo.this);
+        //add your extra information
+        textSliderView.bundle(new Bundle());
+        textSliderView.getBundle()
+                .putString("extra", "");
+
+        return textSliderView;
+    }
+
+    private void jsonParser(String response) {
         Gson gson = new Gson();
         items = gson.fromJson(response, Items.class);
         Log.d("json", gson.toJson(items));
@@ -171,7 +162,7 @@ public class ProductInfo extends AppCompatActivity {
             toolbar.setTitle(title);
         }
         setSupportActionBar(toolbar);
-        if(getSupportActionBar()!=null)
+        if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (toolbar != null) {
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -184,23 +175,53 @@ public class ProductInfo extends AppCompatActivity {
     }
 
 
-    private void startAnim(){
+    private void startAnim() {
         avLoadingIndicatorView.setVisibility(View.VISIBLE);
     }
 
-    private void stopAnim(){
+    private void stopAnim() {
         avLoadingIndicatorView.setVisibility(View.GONE);
     }
 
     @Override
     public void onBackPressed() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             finish();
             overridePendingTransition(R.animator.back_in, R.animator.back_out);
-        } else {
-            supportFinishAfterTransition();
-            super.onBackPressed();
+//        } else {
+//            supportFinishAfterTransition();
+//            super.onBackPressed();
+//        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (sliderShow != null) sliderShow.stopAutoCycle();
+        super.onStop();
+    }
+
+    @Override
+    public void onSliderClick(BaseSliderView slider) {
+        Log.d("onSliderClick", "onSliderClick " + slider.getUrl());
+        if (imageLoaded) {
+            Intent intent = new Intent(ProductInfo.this, ImagePreview.class);
+            intent.putExtra("image", slider.getUrl());
+            startActivity(intent);
         }
     }
 
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
 }

@@ -3,19 +3,21 @@ package com.magomed.gamzatov.universalmarket.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -42,7 +44,7 @@ import java.util.TimerTask;
 
 import jp.co.recruit_lifestyle.android.widget.WaveSwipeRefreshLayout;
 
-public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, NavigationView.OnNavigationItemSelectedListener {
 
     private static final int MY_SOCKET_TIMEOUT_MS = 60_000;
     private List<Item> items = new ArrayList<>();
@@ -54,9 +56,11 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     private RequestQueue requestQueue;
     private RVAdapter adapter;
     Toolbar toolbar;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
     private int limit = 20;
     private int offset = 0;
-    private String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getProducts?limit="+limit+"&offset=";
+    private String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getProductsWithFilter?limit="+limit+"&offset=";
     private boolean clickable = true;
     private boolean hideFab = false;
 
@@ -96,7 +100,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         }
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         rv.setLayoutManager(gridLayoutManager);
-        adapter = new RVAdapter(items);
+        adapter = new RVAdapter(items, this);
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -116,7 +120,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
 
         requestQueue = VolleySingleton.getsInstance().getRequestQueue();
         startAnim();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url+offset, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url+offset, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d("response", response);
@@ -149,28 +153,8 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
                     intent.putExtra("type", items.get(position).getType());
                     intent.putExtra("price", items.get(position).getDescription());
                     intent.putExtra("id", items.get(position).getId());
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        View textViewName = v.findViewById(R.id.item_name);
-                        View textViewPrice = v.findViewById(R.id.item_description);
-                        View view = v.findViewById(R.id.cv);
-                        View image = v.findViewById(R.id.item_photo);
-                        View toolbar = findViewById(R.id.toolbar);
-
-                        Pair<View, String> pair1 = Pair.create(textViewName, textViewName.getTransitionName());
-                        Pair<View, String> pair2 = Pair.create(textViewPrice, textViewPrice.getTransitionName());
-                        Pair<View, String> pair3 = Pair.create(view, view.getTransitionName());
-                        Pair<View, String> pair4 = Pair.create(image, image.getTransitionName());
-                        Pair<View, String> pair5 = Pair.create(toolbar, toolbar.getTransitionName());
-
-                        ActivityOptionsCompat options = ActivityOptionsCompat.
-                                makeSceneTransitionAnimation(ItemsList.this, pair2, pair1, pair3, pair4, pair5,
-                                        Pair.create(findViewById(android.R.id.statusBarBackground), Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME),
-                                        Pair.create(findViewById(android.R.id.navigationBarBackground), Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME));
-                        startActivity(intent, options.toBundle());
-                    } else {
-                        startActivity(intent);
-                        overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
-                    }
+                    startActivity(intent);
+                    overridePendingTransition(R.animator.push_down_in, R.animator.push_down_out);
                 }
             }
         });
@@ -210,6 +194,33 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             }
         });
 
+        setFilerButtonsClickListener();
+
+    }
+
+    private void setFilerButtonsClickListener() {
+        Button resetAll = (Button) findViewById(R.id.buttonReset);
+        Button accept = (Button) findViewById(R.id.buttonAccept);
+
+        resetAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(drawer.isDrawerOpen(GravityCompat.END)){
+                    drawer.closeDrawer(GravityCompat.END);
+                }
+                moreData(false);
+            }
+        });
+
+        accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(drawer.isDrawerOpen(GravityCompat.END)){
+                    drawer.closeDrawer(GravityCompat.END);
+                }
+                moreData(false);
+            }
+        });
     }
 
     @Override
@@ -235,6 +246,55 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             });
         }
 
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+//            @Override
+//            public boolean onOptionsItemSelected(MenuItem item) {
+//                if (item != null && item.getItemId() == android.R.id.home) {
+//                    if (drawer.isDrawerOpen(Gravity.RIGHT)) {
+//                        drawer.closeDrawer(Gravity.RIGHT);
+//                    } else {
+//                        drawer.openDrawer(Gravity.RIGHT);
+//                    }
+//                }
+//                return false;
+//            }
+//        };
+//
+//        if (drawer != null) {
+//            drawer.setDrawerListener(toggle);
+//        }
+//        toggle.syncState();
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        }
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_items, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_filter) {
+            if (drawer.isDrawerOpen(GravityCompat.END)) {
+                drawer.closeDrawer(GravityCompat.END);
+            } else {
+                drawer.openDrawer(GravityCompat.END);
+            }
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void initFab() {
@@ -304,7 +364,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             // начинаем показывать прогресс
             //mSwipeRefreshLayout.setRefreshing(true);
         }
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url+offset, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url+offset, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d("response", response);
@@ -346,11 +406,19 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
 
     @Override
     public void onBackPressed() {
-        if(fab!=null){
-            fab.hide();
+        if(drawer.isDrawerOpen(GravityCompat.END)){
+            drawer.closeDrawer(GravityCompat.END);
+        } else {
+            if (fab != null) {
+                fab.hide();
+            }
+            finish();
+            overridePendingTransition(R.animator.back_in, R.animator.back_out);
         }
-        finish();
-        overridePendingTransition(R.animator.back_in, R.animator.back_out);
     }
 
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        return false;
+    }
 }

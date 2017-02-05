@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">UniversalMarket</string>
     <string name="action_settings">Выйти</string>
+    <string name="action_filters">Фильтры</string>
     <string name="title_activity_items_list">ItemsList</string>
     <string name="title_activity_product_info">ProductInfo</string>
     <string name="title_activity_add_product">AddProduct</string>
@@ -27,4 +28,6 @@
     <string name="activity_add_product_add">Добавить</string>
 
     <string name="nav_header">Войти или \nзарегистирироваться</string>
+    <string name="button_accept">ПРИМЕНИТЬ</string>
+    <string name="button_reset_all">СБРОСИТЬ ВСЕ</string>
 </resources>

@@ -8,6 +8,7 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".activity.ProductInfo"
     tools:showIn="@layout/activity_product_info">
+
     <android.support.v7.widget.CardView
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
@@ -18,109 +19,114 @@
         android:transitionName="@string/activity_layout_trans"
         card_view:cardElevation = "4dp">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.wang.avi.AVLoadingIndicatorView
-            android:id="@+id/avloadingIndicatorView"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal"
-            android:visibility="visible"
-            app:indicator="Pacman"
-            app:indicator_color="@android:color/holo_orange_light" />
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:padding="10dp">
+            android:layout_height="wrap_content">
 
-
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
+            <com.wang.avi.AVLoadingIndicatorView
+                android:id="@+id/avloadingIndicatorView"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
-                android:scaleType="centerInside"
-                android:transitionName="@string/activity_image_trans"
-                android:src="@mipmap/no_image" />
-
-            <TextView
-                android:id="@+id/product_brand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:transitionName="@string/activity_name_trans"
-                tools:text="name" />
-
-            <TextView
-                android:id="@+id/product_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="25sp"
-                tools:text="type" />
-
-            <TextView
-                android:id="@+id/product_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textSize="17sp"
-                android:transitionName="@string/activity_price_trans"
-                tools:text="name" />
+                android:visibility="visible"
+                app:indicator="Pacman"
+                app:indicator_color="@android:color/holo_orange_light" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/customborder">
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:padding="10dp">
+
+
+                <!--<ImageView-->
+                    <!--android:id="@+id/imageView"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="300dp"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:scaleType="centerInside"-->
+                    <!--android:transitionName="@string/activity_image_trans"-->
+                    <!--android:src="@mipmap/no_image" />-->
+
+                <com.daimajia.slider.library.SliderLayout
+                    android:id="@+id/slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    />
 
                 <TextView
-                    android:id="@+id/product_description"
+                    android:id="@+id/product_brand"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:textSize="30sp"
+                    android:transitionName="@string/activity_name_trans"
+                    tools:text="name" />
+
+                <TextView
+                    android:id="@+id/product_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="25sp"
+                    tools:text="type" />
+
+                <TextView
+                    android:id="@+id/product_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:textSize="17sp"
-                    tools:text="description" />
+                    android:transitionName="@string/activity_price_trans"
+                    tools:text="name" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/customborder">
+
+                    <TextView
+                        android:id="@+id/product_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginTop="10dp"
+                        android:textSize="17sp"
+                        tools:text="description" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/product_shop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="20sp"
+                    tools:text="shop" />
+
+                <TextView
+                    android:id="@+id/product_adress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:textSize="17sp"
+                    tools:text="adress" />
+
+                <TextView
+                    android:id="@+id/product_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="5dp"
+                    android:textSize="17sp"
+                    tools:text="phone" />
+
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/product_shop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:textSize="20sp"
-                tools:text="shop" />
-
-            <TextView
-                android:id="@+id/product_adress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="5dp"
-                android:textSize="17sp"
-                tools:text="adress" />
-
-            <TextView
-                android:id="@+id/product_phone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="5dp"
-                android:textSize="17sp"
-                tools:text="phone" />
-
-
-        </LinearLayout>
-    </RelativeLayout>
+        </RelativeLayout>
     </android.support.v7.widget.CardView>
 
 </ScrollView>

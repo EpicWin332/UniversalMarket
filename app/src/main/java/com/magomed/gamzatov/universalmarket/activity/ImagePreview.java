@@ -10,7 +10,9 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.magomed.gamzatov.universalmarket.R;
+import com.magomed.gamzatov.universalmarket.adapter.RVAdapter;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
+import com.squareup.picasso.Picasso;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -33,28 +35,23 @@ public class ImagePreview extends AppCompatActivity {
 
         avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avloadingIndicatorView);
         final ImageView imagePreview = (ImageView) findViewById(R.id.imagePreview);
-        String imgUrl = getIntent().getStringExtra("image");
+        final String imgUrl = getIntent().getStringExtra("image");
         startAnim();
-        ImageLoader imageLoader = VolleySingleton.getsInstance().getImageLoader();
-        imageLoader.get(imgUrl, new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                stopAnim();
-                if (imagePreview != null) {
-                    imagePreview.setImageBitmap(response.getBitmap());
-                    mAttacher = new PhotoViewAttacher(imagePreview);
-                }
-            }
+        Picasso.with(this).load(imgUrl)
+                .error(R.mipmap.no_image)
+                .into(imagePreview, new com.squareup.picasso.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        stopAnim();
+                        mAttacher = new PhotoViewAttacher(imagePreview);
+                    }
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                stopAnim();
-                if (imagePreview != null) {
-                    imagePreview.setBackgroundResource(R.mipmap.no_image);
-                }
-                Toast.makeText(ImagePreview.this , "Error " + error, Toast.LENGTH_LONG).show();
-            }
-        });
+                    @Override
+                    public void onError() {
+                        stopAnim();
+                        Toast.makeText(ImagePreview.this , "Error loading image from url " + imgUrl, Toast.LENGTH_LONG).show();
+                    }
+                });
 
     }
 
@@ -70,7 +67,8 @@ public class ImagePreview extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
 
-        mAttacher.cleanup();
+        if(mAttacher!=null)
+            mAttacher.cleanup();
     }
 
     @Override

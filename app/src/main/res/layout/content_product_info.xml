@@ -9,15 +9,14 @@
     tools:context=".activity.ProductInfo"
     tools:showIn="@layout/activity_product_info">
 
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/cv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:transitionName="@string/activity_layout_trans"
         card_view:cardCornerRadius="4dp"
         card_view:cardElevation="4dp"
         card_view:cardUseCompatPadding="true">
-
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -42,13 +41,20 @@
                 android:padding="10dp">
 
 
-                <ImageView
-                    android:id="@+id/imageView"
+                <!--<ImageView-->
+                    <!--android:id="@+id/imageView"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="300dp"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:scaleType="centerInside"-->
+                    <!--android:src="@mipmap/no_image" />-->
+
+                <com.daimajia.slider.library.SliderLayout
+                    android:id="@+id/slider"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
-                    android:layout_gravity="center_horizontal"
-                    android:scaleType="centerInside"
-                    android:src="@mipmap/no_image" />
+                    android:src="@mipmap/no_image"
+                    />
 
                 <TextView
                     android:id="@+id/product_brand"
