@@ -24,8 +24,13 @@
     <string name="button_singup">Зарегистрироваться</string>
     <string name="activity_add_product_brand">Бренд</string>
     <string name="activity_add_product_price">Цена</string>
+    <string name="activity_add_product_price_min">Цена(мин.)</string>
+    <string name="activity_add_product_price_max">Цена(макс.)</string>
     <string name="activity_add_product_description">Описание</string>
+    <string name="activity_add_product_phone">Телефон</string>
     <string name="activity_add_product_add">Добавить</string>
+    <string name="filter_shop">Магазин: </string>
+    <string name="filter_type">Тип: </string>
 
     <string name="nav_header">Войти или \nзарегистирироваться</string>
     <string name="button_accept">ПРИМЕНИТЬ</string>

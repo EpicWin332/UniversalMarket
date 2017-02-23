@@ -48,43 +48,215 @@
         android:layout_gravity="end"
         android:fitsSystemWindows="true">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginBottom="65dp">
 
-            <TextView
-                android:layout_marginTop="35dp"
-                android:layout_marginLeft="15dp"
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="17sp"
-                android:text="@string/action_filters"/>
+                android:layout_height="wrap_content">
 
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/autoCompleteTextView"
-                android:layout_marginTop="40dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:theme="@style/MyEditTextTheme"
-                android:gravity="center_vertical" >
-
-                <AutoCompleteTextView
-                    android:id="@+id/editEmail"
+                <TextView
+                    android:layout_marginTop="35dp"
+                    android:layout_marginLeft="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:hint="@string/activity_add_product_brand"
-                    android:inputType="textEmailAddress"
-                    android:maxLines="1"
-                    android:theme="@style/MyEditTextTheme"
-                    android:singleLine="true"
-                    android:textSize="16sp" />
+                    android:textStyle="bold"
+                    android:textSize="17sp"
+                    android:text="@string/action_filters"/>
 
-            </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/autoCompleteTextView"
+                    android:layout_marginTop="30dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/MyEditTextTheme"
+                    android:gravity="center_vertical" >
+
+                    <AutoCompleteTextView
+                        android:id="@+id/editBrand"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:hint="@string/activity_add_product_brand"
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1"
+                        android:theme="@style/MyEditTextTheme"
+                        android:singleLine="true"
+                        android:textSize="16sp" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:theme="@style/MyEditTextTheme" >
+
+                    <AutoCompleteTextView
+                        android:id="@+id/editDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:hint="@string/activity_add_product_description"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:inputType="textMultiLine"
+                        android:ems="10"
+                        android:theme="@style/MyEditTextTheme"
+                        android:textSize="16sp" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="0.5"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:theme="@style/MyEditTextTheme" >
+
+                        <AutoCompleteTextView
+                            android:id="@+id/editMinPrice"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginLeft="15dp"
+                            android:hint="@string/activity_add_product_price_min"
+                            android:inputType="numberDecimal"
+                            android:maxLines="1"
+                            android:theme="@style/MyEditTextTheme"
+                            android:textSize="16sp" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="0.5"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:theme="@style/MyEditTextTheme" >
+
+                        <AutoCompleteTextView
+                            android:id="@+id/editMaxPrice"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginRight="15dp"
+                            android:hint="@string/activity_add_product_price_max"
+                            android:inputType="numberDecimal"
+                            android:maxLines="1"
+                            android:theme="@style/MyEditTextTheme"
+                            android:textSize="16sp" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                </LinearLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:theme="@style/MyEditTextTheme" >
+
+                    <AutoCompleteTextView
+                        android:id="@+id/editPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:hint="@string/activity_add_product_phone"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:inputType="phone"
+                        android:theme="@style/MyEditTextTheme"
+                        android:textSize="16sp" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="15dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/filter_shop"/>
+                    <Spinner
+                        android:id="@+id/editShop"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:orientation="horizontal"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/filter_type"/>
+                    <Spinner
+                        android:id="@+id/editType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_gravity="bottom"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/buttonReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00ffffff"
+                android:layout_marginRight="15dp"
+                android:shadowColor="#A8A8A8"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="5"
+                android:text="@string/button_reset_all"
+                android:textColor="@color/colorPrimary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/buttonAccept"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/buttonshape"
+                android:shadowColor="#A8A8A8"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="5"
+                android:text="@string/button_accept"
+                android:textColor="@color/colorAccent"
+                android:textSize="12sp" />
 
         </LinearLayout>
 

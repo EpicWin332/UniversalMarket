@@ -17,14 +17,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -33,16 +39,26 @@ import com.magomed.gamzatov.universalmarket.adapter.Item;
 import com.magomed.gamzatov.universalmarket.adapter.ItemClickSupport;
 import com.magomed.gamzatov.universalmarket.adapter.RVAdapter;
 import com.magomed.gamzatov.universalmarket.entity.Items;
+import com.magomed.gamzatov.universalmarket.network.DictionaryQuery;
+import com.magomed.gamzatov.universalmarket.network.RegistrationQuery;
 import com.magomed.gamzatov.universalmarket.network.ServiceGenerator;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import jp.co.recruit_lifestyle.android.widget.WaveSwipeRefreshLayout;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, NavigationView.OnNavigationItemSelectedListener {
 
@@ -63,6 +79,24 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     private String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getProductsWithFilter?limit="+limit+"&offset=";
     private boolean clickable = true;
     private boolean hideFab = false;
+    private EditText brand;
+    private EditText description;
+    private EditText priceMin;
+    private EditText priceMax;
+    private EditText phone;
+    private Spinner shop;
+    private Spinner type;
+    private List<Map<String, String>> shops = new ArrayList<>();
+    private List<Map<String, String>> types = new ArrayList<>();
+
+    private String brandCurrent = "";
+    private String descriptionCurrent = "";
+    private String priceMinCurrent = "";
+    private String priceMaxCurrent = "";
+    private String phoneCurrent = "";
+    private String shopCurrent = "";
+    private String typeCurrent = "";
+
 
     private boolean loading = true;
     private int pastVisiblesItems, visibleItemCount, totalItemCount;
@@ -74,18 +108,24 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         initToolbar("Все");
         initFab();
 
-//        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
-//        if (mSwipeRefreshLayout != null) {
-//            mSwipeRefreshLayout.setOnRefreshListener(this);
-//        }
+        brand = (EditText) findViewById(R.id.editBrand);
+        description = (EditText) findViewById(R.id.editDescription);
+        priceMin = (EditText) findViewById(R.id.editMinPrice);
+        priceMax = (EditText) findViewById(R.id.editMaxPrice);
+        phone = (EditText) findViewById(R.id.editPhone);
+        shop = (Spinner) findViewById(R.id.editShop);
+        type = (Spinner) findViewById(R.id.editType);
+
+        Map<String, String> empty =  new HashMap<>();
+        empty.put("id", "-1");
+        empty.put("name", "");
+        shops.add(empty);
+        types.add(empty);
 
         mWaveSwipeRefreshLayout = (WaveSwipeRefreshLayout) findViewById(R.id.main_swipe);
         if (mWaveSwipeRefreshLayout != null) {
             mWaveSwipeRefreshLayout.setColorSchemeColors(Color.WHITE, Color.WHITE);
             mWaveSwipeRefreshLayout.setWaveColor(Color.argb(255,49,67,91));
-//            mWaveSwipeRefreshLayout.setWaveARGBColor(255,63,81,181);
-//            mWaveSwipeRefreshLayout.setColorSchemeColors(R.color.colorWhite);
-//            mWaveSwipeRefreshLayout.setColorSchemeResources(R.id.toolbar);
         }
         mWaveSwipeRefreshLayout.setOnRefreshListener(new WaveSwipeRefreshLayout.OnRefreshListener() {
             @Override public void onRefresh() {
@@ -194,20 +234,37 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             }
         });
 
-        setFilerButtonsClickListener();
+        setFilerListener();
 
     }
 
-    private void setFilerButtonsClickListener() {
+    private void setFilerListener() {
         Button resetAll = (Button) findViewById(R.id.buttonReset);
         Button accept = (Button) findViewById(R.id.buttonAccept);
 
         resetAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                brand.setText("");
+                description.setText("");
+                priceMin.setText("");
+                priceMax.setText("");
+                phone.setText("");
+                if(shop.getSelectedItem() !=null)
+                    shop.setSelection(0);
+                if(type.getSelectedItem() !=null)
+                    type.setSelection(0);
+                brandCurrent = "";
+                descriptionCurrent = "";
+                priceMinCurrent = "";
+                priceMaxCurrent = "";
+                phoneCurrent = "";
+                shopCurrent = "";
+                typeCurrent = "";
                 if(drawer.isDrawerOpen(GravityCompat.END)){
                     drawer.closeDrawer(GravityCompat.END);
                 }
+                startAnim();
                 moreData(false);
             }
         });
@@ -215,12 +272,102 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                brandCurrent = brand.getText().toString();
+                descriptionCurrent = description.getText().toString();
+                priceMinCurrent = priceMin.getText().toString();
+                priceMaxCurrent = priceMax.getText().toString();
+                phoneCurrent = phone.getText().toString();
+                if(shop.getSelectedItem() != null)
+                    shopCurrent = shops.get(((int) shop.getSelectedItemId())).get("name");
+                if(type.getSelectedItem() != null)
+                    typeCurrent = types.get(((int) type.getSelectedItemId())).get("name");
+
                 if(drawer.isDrawerOpen(GravityCompat.END)){
                     drawer.closeDrawer(GravityCompat.END);
                 }
+                startAnim();
                 moreData(false);
             }
         });
+
+        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View view, float v) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View view) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(View view) {
+                brand.setText(brandCurrent);
+                description.setText(descriptionCurrent);
+                priceMin.setText(priceMinCurrent);
+                priceMax.setText(priceMaxCurrent);
+                phone.setText(phoneCurrent);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int i) {
+
+            }
+        });
+
+        DictionaryQuery service = ServiceGenerator.createService(DictionaryQuery.class);
+
+        service.getDictionaries("shops").enqueue(new Callback<List<Map<String, String>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, String>>> call, retrofit2.Response<List<Map<String, String>>> response) {
+                if(response.code()==200) {
+                    Log.d("onResponse shops", response.body().toString());
+                    shops.addAll(response.body());
+                    List<String> shopNames = new ArrayList<>();
+                    for (Map<String, String> item: shops) {
+                        shopNames.add(item.get("name"));
+                    }
+                    shop.setAdapter(new ArrayAdapter<>(ItemsList.this,
+                            android.R.layout.simple_spinner_dropdown_item,
+                            shopNames));
+                }
+                else {
+                    Log.e("onResponse error shops:", response.code() + " " + response.message()+ " " + response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Map<String, String>>> call, Throwable t) {
+                Log.d("onFailure shops", t.getMessage());
+            }
+        });
+
+        service.getDictionaries("types").enqueue(new Callback<List<Map<String, String>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, String>>> call, retrofit2.Response<List<Map<String, String>>> response) {
+                if(response.code()==200) {
+                    Log.d("onResponse types", response.body().toString());
+                    types.addAll(response.body());
+                    List<String> typeNames = new ArrayList<>();
+                    for (Map<String, String> item: types) {
+                        typeNames.add(item.get("name"));
+                    }
+                    type.setAdapter(new ArrayAdapter<>(ItemsList.this,
+                            android.R.layout.simple_spinner_dropdown_item,
+                            typeNames));
+                }
+                else {
+                    Log.e("onResponse error types:", response.code() + " " + response.message()+ " " + response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Map<String, String>>> call, Throwable t) {
+                Log.d("onFailure types", t.getMessage());
+            }
+        });
+
     }
 
     @Override
@@ -247,25 +394,6 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
         }
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-//            @Override
-//            public boolean onOptionsItemSelected(MenuItem item) {
-//                if (item != null && item.getItemId() == android.R.id.home) {
-//                    if (drawer.isDrawerOpen(Gravity.RIGHT)) {
-//                        drawer.closeDrawer(Gravity.RIGHT);
-//                    } else {
-//                        drawer.openDrawer(Gravity.RIGHT);
-//                    }
-//                }
-//                return false;
-//            }
-//        };
-//
-//        if (drawer != null) {
-//            drawer.setDrawerListener(toggle);
-//        }
-//        toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         if (navigationView != null) {
@@ -354,54 +482,97 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     }
 
     private void moreData(final boolean pagination) {
-        Log.d("refresh", "start");
-        if(pagination){
-            offset+=limit;
-            items.add(null);
-            adapter.notifyItemInserted(items.size() - 1);
-        } else {
-            offset = 0;
-            // начинаем показывать прогресс
-            //mSwipeRefreshLayout.setRefreshing(true);
+        try {
+            Log.d("refresh", "start");
+            if(pagination){
+                offset+=limit;
+                items.add(null);
+                adapter.notifyItemInserted(items.size() - 1);
+            } else {
+                offset = 0;
+                // начинаем показывать прогресс
+                //mSwipeRefreshLayout.setRefreshing(true);
+            }
+            JSONObject jsonBody = new JSONObject();
+            if(!brandCurrent.isEmpty())
+                jsonBody.put("brand", brandCurrent);
+            if(!descriptionCurrent.isEmpty())
+                jsonBody.put("description", descriptionCurrent);
+            if(!priceMaxCurrent.isEmpty())
+                jsonBody.put("priceMax", priceMaxCurrent);
+            if(!priceMinCurrent.isEmpty())
+                jsonBody.put("priceMin", priceMinCurrent);
+            if(!phoneCurrent.isEmpty())
+                jsonBody.put("shopPhone", phoneCurrent);
+            if(!shopCurrent.isEmpty())
+                jsonBody.put("shopName", shopCurrent);
+            if(!typeCurrent.isEmpty())
+                jsonBody.put("typeName", typeCurrent);
+
+
+            final String requestBody = jsonBody.toString();
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url+offset, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Log.d("response", response);
+                    if(pagination) {
+                        items.remove(items.size() - 1);
+                        adapter.notifyItemRemoved(items.size());
+                    }
+                    jsonParser(response, pagination);
+                    Log.d("refresh", "end");
+                    mWaveSwipeRefreshLayout.setRefreshing(false);
+                    stopAnim();
+                    if(pagination) {
+                        adapter.notifyItemInserted(items.size());
+                    } else {
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d("refresh", "end");
+                    mWaveSwipeRefreshLayout.setRefreshing(false);
+                    stopAnim();
+                    Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_LONG).show();
+                    loading = true;
+                    if(pagination){
+                        offset-=limit;
+                        items.remove(items.size() - 1);
+                        adapter.notifyItemRemoved(items.size());
+                    }
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return requestBody == null ? null : requestBody.getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                        return null;
+                    }
+                }
+
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    return super.parseNetworkResponse(response);
+                }
+            };
+
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    MY_SOCKET_TIMEOUT_MS,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            requestQueue.add(stringRequest);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url+offset, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Log.d("response", response);
-                if(pagination) {
-                    items.remove(items.size() - 1);
-                    adapter.notifyItemRemoved(items.size());
-                }
-                jsonParser(response, pagination);
-                Log.d("refresh", "end");
-                //mSwipeRefreshLayout.setRefreshing(false);
-                mWaveSwipeRefreshLayout.setRefreshing(false);
-                if(pagination) {
-                    adapter.notifyItemInserted(items.size());
-                } else {
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("refresh", "end");
-                //mSwipeRefreshLayout.setRefreshing(false);
-                mWaveSwipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_LONG).show();
-                loading = true;
-                if(pagination){
-                    offset-=limit;
-                    items.remove(items.size() - 1);
-                    adapter.notifyItemRemoved(items.size());
-                }
-            }
-        });
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                MY_SOCKET_TIMEOUT_MS,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        requestQueue.add(stringRequest);
     }
 
     @Override
