@@ -5,6 +5,7 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -13,7 +14,7 @@ import retrofit2.http.Query;
 
 public interface DictionaryQuery {
 
-    @GET(ServiceGenerator.API_PREFIX_URL+ "/getDictionaries")
-    Call<List<Map<String, String>>> getDictionaries(@Query("dictionary") String dictionary);
+    @GET(ServiceGenerator.API_PREFIX_URL+ "/dictionaries/{type}")
+    Call<List<Map<String, String>>> getDictionaries(@Path("type") String type);
 
 }

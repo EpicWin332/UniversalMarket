@@ -42,6 +42,7 @@ import com.magomed.gamzatov.universalmarket.entity.Items;
 import com.magomed.gamzatov.universalmarket.network.DictionaryQuery;
 import com.magomed.gamzatov.universalmarket.network.RegistrationQuery;
 import com.magomed.gamzatov.universalmarket.network.ServiceGenerator;
+import com.magomed.gamzatov.universalmarket.network.ShopsQuery;
 import com.magomed.gamzatov.universalmarket.network.VolleySingleton;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -76,7 +77,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     private NavigationView navigationView;
     private int limit = 20;
     private int offset = 0;
-    private String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/getProductsWithFilter?limit="+limit+"&offset=";
+    private String url = ServiceGenerator.API_BASE_URL+ ServiceGenerator.API_PREFIX_URL + "/products?limit="+limit+"&offset=";
     private boolean clickable = true;
     private boolean hideFab = false;
     private EditText brand;
@@ -160,7 +161,7 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
 
         requestQueue = VolleySingleton.getsInstance().getRequestQueue();
         startAnim();
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url+offset, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url+offset, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d("response", response);
@@ -316,9 +317,9 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             }
         });
 
-        DictionaryQuery service = ServiceGenerator.createService(DictionaryQuery.class);
+        ShopsQuery shopsQuery = ServiceGenerator.createService(ShopsQuery.class);
 
-        service.getDictionaries("shops").enqueue(new Callback<List<Map<String, String>>>() {
+        shopsQuery.getShops().enqueue(new Callback<List<Map<String, String>>>() {
             @Override
             public void onResponse(Call<List<Map<String, String>>> call, retrofit2.Response<List<Map<String, String>>> response) {
                 if(response.code()==200) {
@@ -343,7 +344,10 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
             }
         });
 
-        service.getDictionaries("types").enqueue(new Callback<List<Map<String, String>>>() {
+
+        DictionaryQuery dictionaryQuery = ServiceGenerator.createService(DictionaryQuery.class);
+
+        dictionaryQuery.getDictionaries("types").enqueue(new Callback<List<Map<String, String>>>() {
             @Override
             public void onResponse(Call<List<Map<String, String>>> call, retrofit2.Response<List<Map<String, String>>> response) {
                 if(response.code()==200) {
@@ -482,97 +486,71 @@ public class ItemsList extends AppCompatActivity implements SwipeRefreshLayout.O
     }
 
     private void moreData(final boolean pagination) {
-        try {
-            Log.d("refresh", "start");
-            if(pagination){
-                offset+=limit;
-                items.add(null);
-                adapter.notifyItemInserted(items.size() - 1);
-            } else {
-                offset = 0;
-                // начинаем показывать прогресс
-                //mSwipeRefreshLayout.setRefreshing(true);
-            }
-            JSONObject jsonBody = new JSONObject();
-            if(!brandCurrent.isEmpty())
-                jsonBody.put("brand", brandCurrent);
-            if(!descriptionCurrent.isEmpty())
-                jsonBody.put("description", descriptionCurrent);
-            if(!priceMaxCurrent.isEmpty())
-                jsonBody.put("priceMax", priceMaxCurrent);
-            if(!priceMinCurrent.isEmpty())
-                jsonBody.put("priceMin", priceMinCurrent);
-            if(!phoneCurrent.isEmpty())
-                jsonBody.put("shopPhone", phoneCurrent);
-            if(!shopCurrent.isEmpty())
-                jsonBody.put("shopName", shopCurrent);
-            if(!typeCurrent.isEmpty())
-                jsonBody.put("typeName", typeCurrent);
-
-
-            final String requestBody = jsonBody.toString();
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, url+offset, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    Log.d("response", response);
-                    if(pagination) {
-                        items.remove(items.size() - 1);
-                        adapter.notifyItemRemoved(items.size());
-                    }
-                    jsonParser(response, pagination);
-                    Log.d("refresh", "end");
-                    mWaveSwipeRefreshLayout.setRefreshing(false);
-                    stopAnim();
-                    if(pagination) {
-                        adapter.notifyItemInserted(items.size());
-                    } else {
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d("refresh", "end");
-                    mWaveSwipeRefreshLayout.setRefreshing(false);
-                    stopAnim();
-                    Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_LONG).show();
-                    loading = true;
-                    if(pagination){
-                        offset-=limit;
-                        items.remove(items.size() - 1);
-                        adapter.notifyItemRemoved(items.size());
-                    }
-                }
-            }) {
-                @Override
-                public String getBodyContentType() {
-                    return "application/json; charset=utf-8";
-                }
-
-                @Override
-                public byte[] getBody() throws AuthFailureError {
-                    try {
-                        return requestBody == null ? null : requestBody.getBytes("utf-8");
-                    } catch (UnsupportedEncodingException uee) {
-                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
-                        return null;
-                    }
-                }
-
-                @Override
-                protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                    return super.parseNetworkResponse(response);
-                }
-            };
-
-            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                    MY_SOCKET_TIMEOUT_MS,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            requestQueue.add(stringRequest);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        Log.d("refresh", "start");
+        if(pagination){
+            offset+=limit;
+            items.add(null);
+            adapter.notifyItemInserted(items.size() - 1);
+        } else {
+            offset = 0;
+            // начинаем показывать прогресс
+            //mSwipeRefreshLayout.setRefreshing(true);
         }
+        StringBuilder queryParams = new StringBuilder();
+        if(!brandCurrent.isEmpty())
+            queryParams.append("&brand=").append(brandCurrent);
+        if(!descriptionCurrent.isEmpty())
+            queryParams.append("&description=").append(descriptionCurrent);
+        if(!priceMaxCurrent.isEmpty())
+            queryParams.append("&priceMax=").append(priceMaxCurrent);
+        if(!priceMinCurrent.isEmpty())
+            queryParams.append("&priceMin=").append(priceMinCurrent);
+        if(!phoneCurrent.isEmpty())
+            queryParams.append("&shopPhone=").append(phoneCurrent);
+        if(!shopCurrent.isEmpty())
+            queryParams.append("&shopName=").append(shopCurrent);
+        if(!typeCurrent.isEmpty())
+            queryParams.append("&typeName=").append(typeCurrent);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url+offset+queryParams.toString(), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("response", response);
+                if(pagination) {
+                    items.remove(items.size() - 1);
+                    adapter.notifyItemRemoved(items.size());
+                }
+                jsonParser(response, pagination);
+                Log.d("refresh", "end");
+                mWaveSwipeRefreshLayout.setRefreshing(false);
+                stopAnim();
+                if(pagination) {
+                    adapter.notifyItemInserted(items.size());
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("refresh", "end");
+                mWaveSwipeRefreshLayout.setRefreshing(false);
+                stopAnim();
+                Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_LONG).show();
+                loading = true;
+                if(pagination){
+                    offset-=limit;
+                    items.remove(items.size() - 1);
+                    adapter.notifyItemRemoved(items.size());
+                }
+            }
+        });
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                MY_SOCKET_TIMEOUT_MS,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        requestQueue.add(stringRequest);
     }
 
     @Override

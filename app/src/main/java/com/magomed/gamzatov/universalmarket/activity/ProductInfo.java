@@ -67,7 +67,7 @@ public class ProductInfo extends AppCompatActivity implements BaseSliderView.OnS
         final int id = intent.getIntExtra("id", 0);
         initToolbar(type + " " + brand);
 
-        String url = ServiceGenerator.API_BASE_URL + ServiceGenerator.API_PREFIX_URL + "/getParticularProduct?id=" + id;
+        String url = ServiceGenerator.API_BASE_URL + ServiceGenerator.API_PREFIX_URL + "/products/" + id;
 
         TextView product_brand = (TextView) findViewById(R.id.product_brand);
         TextView product_type = (TextView) findViewById(R.id.product_type);
